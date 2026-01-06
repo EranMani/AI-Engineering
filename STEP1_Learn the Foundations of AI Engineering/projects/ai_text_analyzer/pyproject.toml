@@ -1,0 +1,17 @@
+[project]
+name = "ai-text-analyzer"
+version = "0.1.0"
+description = "AI-powered text analysis CLI tool"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "openai>=2.14.0",
+    "pydantic>=2.12.5",
+    "python-dotenv>=1.0.0",
+    "tenacity>=9.1.2",
+]
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+]

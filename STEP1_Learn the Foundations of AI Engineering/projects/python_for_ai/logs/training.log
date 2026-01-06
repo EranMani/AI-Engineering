@@ -1,0 +1,249 @@
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:68 - ==================================================
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:69 - Starting advanced model training
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:70 - ==================================================
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:74 - Epoch 1 started
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 10: loss=0.100000, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 20: loss=0.050000, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 30: loss=0.033333, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 40: loss=0.025000, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 50: loss=0.020000, lr=0.001
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:86 - Step 50: loss=0.0200
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 60: loss=0.016667, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 70: loss=0.014286, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 80: loss=0.012500, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 90: loss=0.011111, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 100: loss=0.010000, lr=0.001
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:86 - Step 100: loss=0.0100
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:92 - Epoch 1 completed
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:74 - Epoch 2 started
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 10: loss=0.050000, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 20: loss=0.025000, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 30: loss=0.016667, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 40: loss=0.012500, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 50: loss=0.010000, lr=0.001
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:86 - Step 50: loss=0.0100
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 60: loss=0.008333, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 70: loss=0.007143, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 80: loss=0.006250, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 90: loss=0.005556, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 100: loss=0.005000, lr=0.001
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:86 - Step 100: loss=0.0050
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:92 - Epoch 2 completed
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:74 - Epoch 3 started
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 10: loss=0.033333, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 20: loss=0.016667, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 30: loss=0.011111, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 40: loss=0.008333, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 50: loss=0.006667, lr=0.001
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:86 - Step 50: loss=0.0067
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 60: loss=0.005556, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 70: loss=0.004762, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 80: loss=0.004167, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 90: loss=0.003704, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 100: loss=0.003333, lr=0.001
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:86 - Step 100: loss=0.0033
+2026-01-01 08:58:44 - __main__ - WARNING - train_model_advanced:90 - GPU temperature is high (75°C), but continuing...
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:92 - Epoch 3 completed
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:74 - Epoch 4 started
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 10: loss=0.025000, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 20: loss=0.012500, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 30: loss=0.008333, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 40: loss=0.006250, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 50: loss=0.005000, lr=0.001
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:86 - Step 50: loss=0.0050
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 60: loss=0.004167, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 70: loss=0.003571, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 80: loss=0.003125, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 90: loss=0.002778, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 100: loss=0.002500, lr=0.001
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:86 - Step 100: loss=0.0025
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:92 - Epoch 4 completed
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:74 - Epoch 5 started
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 10: loss=0.020000, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 20: loss=0.010000, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 30: loss=0.006667, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 40: loss=0.005000, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 50: loss=0.004000, lr=0.001
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:86 - Step 50: loss=0.0040
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 60: loss=0.003333, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 70: loss=0.002857, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 80: loss=0.002500, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 90: loss=0.002222, lr=0.001
+2026-01-01 08:58:44 - __main__ - DEBUG - train_model_advanced:82 - Step 100: loss=0.002000, lr=0.001
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:86 - Step 100: loss=0.0020
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:92 - Epoch 5 completed
+2026-01-01 08:58:44 - __main__ - INFO - train_model_advanced:94 - Training completed successfully
+2026-01-01 09:02:45 - __main__ - INFO - demonstrate_best_practices:95 - ============================================================
+2026-01-01 09:02:45 - __main__ - INFO - demonstrate_best_practices:96 - Logging Best Practices Demonstration
+2026-01-01 09:02:45 - __main__ - INFO - demonstrate_best_practices:97 - ============================================================
+2026-01-01 09:02:45 - __main__.ModelTrainer - INFO - __init__:31 - Initialized ModelTrainer for model: my_model
+2026-01-01 09:02:45 - __main__.ModelTrainer - INFO - load_data:35 - Loading data from data/train.csv
+2026-01-01 09:02:45 - __main__.ModelTrainer - DEBUG - load_data:39 - Data shape: 10000 samples
+2026-01-01 09:02:45 - __main__.ModelTrainer - INFO - load_data:40 - Successfully loaded 10000 samples
+2026-01-01 09:02:45 - __main__.ModelTrainer - INFO - train:51 - Starting training for 5 epochs
+2026-01-01 09:02:45 - __main__.ModelTrainer - INFO - train:54 - Epoch 1/5
+2026-01-01 09:02:45 - __main__.ModelTrainer - INFO - train:64 - Metrics - Loss: 1.0000, Accuracy: 0.5500, LR: 0.001
+2026-01-01 09:02:45 - __main__.ModelTrainer - DEBUG - train:71 - Full metrics dict: {'loss': 1.0, 'accuracy': 0.55, 'learning_rate': 0.001}
+2026-01-01 09:02:45 - __main__.ModelTrainer - WARNING - train:75 - Loss is high (1.0000), consider adjusting learning rate
+2026-01-01 09:02:45 - __main__.ModelTrainer - INFO - train:54 - Epoch 2/5
+2026-01-01 09:02:45 - __main__.ModelTrainer - INFO - train:64 - Metrics - Loss: 0.5000, Accuracy: 0.6000, LR: 0.001
+2026-01-01 09:02:45 - __main__.ModelTrainer - DEBUG - train:71 - Full metrics dict: {'loss': 0.5, 'accuracy': 0.6, 'learning_rate': 0.001}
+2026-01-01 09:02:45 - __main__.ModelTrainer - INFO - train:54 - Epoch 3/5
+2026-01-01 09:02:45 - __main__.ModelTrainer - INFO - train:64 - Metrics - Loss: 0.3333, Accuracy: 0.6500, LR: 0.001
+2026-01-01 09:02:45 - __main__.ModelTrainer - DEBUG - train:71 - Full metrics dict: {'loss': 0.3333333333333333, 'accuracy': 0.65, 'learning_rate': 0.001}
+2026-01-01 09:02:45 - __main__.ModelTrainer - INFO - train:54 - Epoch 4/5
+2026-01-01 09:02:45 - __main__.ModelTrainer - INFO - train:64 - Metrics - Loss: 0.2500, Accuracy: 0.7000, LR: 0.001
+2026-01-01 09:02:45 - __main__.ModelTrainer - DEBUG - train:71 - Full metrics dict: {'loss': 0.25, 'accuracy': 0.7, 'learning_rate': 0.001}
+2026-01-01 09:02:45 - __main__.ModelTrainer - INFO - train:54 - Epoch 5/5
+2026-01-01 09:02:45 - __main__.ModelTrainer - INFO - train:64 - Metrics - Loss: 0.2000, Accuracy: 0.7500, LR: 0.001
+2026-01-01 09:02:45 - __main__.ModelTrainer - DEBUG - train:71 - Full metrics dict: {'loss': 0.2, 'accuracy': 0.75, 'learning_rate': 0.001}
+2026-01-01 09:02:45 - __main__.ModelTrainer - INFO - train:77 - Training completed successfully
+2026-01-01 09:02:45 - __main__.ModelTrainer - INFO - evaluate:81 - Evaluating on 1000 test samples
+2026-01-01 09:02:45 - __main__.ModelTrainer - INFO - evaluate:85 - Test accuracy: 85.00%
+2026-01-01 09:06:07 - __main__ - INFO - debug_with_logging:40 - ==================================================
+2026-01-01 09:06:07 - __main__ - INFO - debug_with_logging:41 - Debugging with logging - RECOMMENDED
+2026-01-01 09:06:07 - __main__ - INFO - debug_with_logging:42 - ==================================================
+2026-01-01 09:06:07 - __main__ - DEBUG - debug_with_logging:47 - Input - Predictions: [0.5, 0.7, 0.9]
+2026-01-01 09:06:07 - __main__ - DEBUG - debug_with_logging:48 - Input - Targets: [0.4, 0.6, 0.8]
+2026-01-01 09:06:07 - __main__ - DEBUG - debug_with_logging:49 - Length check - Predictions: 3, Targets: 3
+2026-01-01 09:06:07 - __main__ - INFO - debug_with_logging:52 - Calculated loss: 0.0100
+2026-01-01 09:06:07 - __main__ - INFO - debug_with_assertions:57 - ==================================================
+2026-01-01 09:06:07 - __main__ - INFO - debug_with_assertions:58 - Debugging with assertions
+2026-01-01 09:06:07 - __main__ - INFO - debug_with_assertions:59 - ==================================================
+2026-01-01 09:06:07 - __main__ - INFO - debug_with_assertions:71 - Loss calculated successfully: 0.0100
+2026-01-01 09:07:59 - __main__ - INFO - debug_with_assertions:57 - ==================================================
+2026-01-01 09:07:59 - __main__ - INFO - debug_with_assertions:58 - Debugging with assertions
+2026-01-01 09:07:59 - __main__ - INFO - debug_with_assertions:59 - ==================================================
+2026-01-01 09:07:59 - __main__ - INFO - debug_with_assertions:71 - Loss calculated successfully: 0.0100
+2026-01-01 09:08:06 - __main__ - INFO - debug_with_logging:40 - ==================================================
+2026-01-01 09:08:06 - __main__ - INFO - debug_with_logging:41 - Debugging with logging - RECOMMENDED
+2026-01-01 09:08:06 - __main__ - INFO - debug_with_logging:42 - ==================================================
+2026-01-01 09:08:06 - __main__ - DEBUG - debug_with_logging:47 - Input - Predictions: [0.5, 0.7, 0.9]
+2026-01-01 09:08:06 - __main__ - DEBUG - debug_with_logging:48 - Input - Targets: [0.4, 0.6, 0.8]
+2026-01-01 09:08:06 - __main__ - DEBUG - debug_with_logging:49 - Length check - Predictions: 3, Targets: 3
+2026-01-01 09:08:06 - __main__ - INFO - debug_with_logging:52 - Calculated loss: 0.0100
+2026-01-01 09:08:33 - __main__ - INFO - strategy_1_binary_search:61 - ============================================================
+2026-01-01 09:08:33 - __main__ - INFO - strategy_1_binary_search:62 - Strategy 1: Binary Search - Narrow down the problem
+2026-01-01 09:08:33 - __main__ - INFO - strategy_1_binary_search:63 - ============================================================
+2026-01-01 09:08:33 - __main__ - INFO - __init__:22 - Initialized DataProcessor with threshold=0.5
+2026-01-01 09:08:33 - __main__ - INFO - strategy_1_binary_search:69 - Testing with 10 items
+2026-01-01 09:08:33 - __main__ - INFO - process_batch:43 - Processing batch of 10 items
+2026-01-01 09:08:33 - __main__ - DEBUG - process_batch:47 - Processing item 1/10: 0.1
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:29 - Processing item: 0.1
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:38 - Item below threshold: 0.1
+2026-01-01 09:08:33 - __main__ - DEBUG - process_batch:47 - Processing item 2/10: 0.2
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:29 - Processing item: 0.2
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:38 - Item below threshold: 0.2
+2026-01-01 09:08:33 - __main__ - DEBUG - process_batch:47 - Processing item 3/10: 0.3
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:29 - Processing item: 0.3
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:38 - Item below threshold: 0.3
+2026-01-01 09:08:33 - __main__ - DEBUG - process_batch:47 - Processing item 4/10: 0.4
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:29 - Processing item: 0.4
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:38 - Item below threshold: 0.4
+2026-01-01 09:08:33 - __main__ - DEBUG - process_batch:47 - Processing item 5/10: 0.5
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:29 - Processing item: 0.5
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:38 - Item below threshold: 0.5
+2026-01-01 09:08:33 - __main__ - DEBUG - process_batch:47 - Processing item 6/10: 0.6
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:29 - Processing item: 0.6
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:35 - Item processed: 0.6 -> 1.2
+2026-01-01 09:08:33 - __main__ - DEBUG - process_batch:47 - Processing item 7/10: 0.7
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:29 - Processing item: 0.7
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:35 - Item processed: 0.7 -> 1.4
+2026-01-01 09:08:33 - __main__ - DEBUG - process_batch:47 - Processing item 8/10: 0.8
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:29 - Processing item: 0.8
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:35 - Item processed: 0.8 -> 1.6
+2026-01-01 09:08:33 - __main__ - DEBUG - process_batch:47 - Processing item 9/10: 0.9
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:29 - Processing item: 0.9
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:35 - Item processed: 0.9 -> 1.8
+2026-01-01 09:08:33 - __main__ - DEBUG - process_batch:47 - Processing item 10/10: 1.0
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:29 - Processing item: 1.0
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:35 - Item processed: 1.0 -> 2.0
+2026-01-01 09:08:33 - __main__ - INFO - process_batch:52 - Batch processed: 5/10 items passed threshold
+2026-01-01 09:08:33 - __main__ - INFO - strategy_1_binary_search:71 - Results: 5 items
+2026-01-01 09:08:33 - __main__ - INFO - strategy_1_binary_search:75 - Testing with single item: [0.6]
+2026-01-01 09:08:33 - __main__ - INFO - process_batch:43 - Processing batch of 1 items
+2026-01-01 09:08:33 - __main__ - DEBUG - process_batch:47 - Processing item 1/1: 0.6
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:29 - Processing item: 0.6
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:35 - Item processed: 0.6 -> 1.2
+2026-01-01 09:08:33 - __main__ - INFO - process_batch:52 - Batch processed: 1/1 items passed threshold
+2026-01-01 09:08:33 - __main__ - INFO - strategy_1_binary_search:77 - Results: [1.2]
+2026-01-01 09:08:33 - __main__ - INFO - strategy_1_binary_search:81 - Testing edge case: [0.5]
+2026-01-01 09:08:33 - __main__ - INFO - process_batch:43 - Processing batch of 1 items
+2026-01-01 09:08:33 - __main__ - DEBUG - process_batch:47 - Processing item 1/1: 0.5
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:29 - Processing item: 0.5
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:38 - Item below threshold: 0.5
+2026-01-01 09:08:33 - __main__ - INFO - process_batch:52 - Batch processed: 0/1 items passed threshold
+2026-01-01 09:08:33 - __main__ - INFO - strategy_1_binary_search:83 - Results: []
+2026-01-01 09:08:33 - __main__ - INFO - strategy_2_add_logging:91 - ============================================================
+2026-01-01 09:08:33 - __main__ - INFO - strategy_2_add_logging:92 - Strategy 2: Add Strategic Logging
+2026-01-01 09:08:33 - __main__ - INFO - strategy_2_add_logging:93 - ============================================================
+2026-01-01 09:08:33 - __main__ - INFO - __init__:22 - Initialized DataProcessor with threshold=0.5
+2026-01-01 09:08:33 - __main__ - INFO - strategy_2_add_logging:99 - Testing with data: [-0.5, 0.0, 0.5, 1.0]
+2026-01-01 09:08:33 - __main__ - INFO - strategy_2_add_logging:103 - --- Processing value: -0.5 ---
+2026-01-01 09:08:33 - __main__ - DEBUG - strategy_2_add_logging:104 - Value type: <class 'float'>
+2026-01-01 09:08:33 - __main__ - DEBUG - strategy_2_add_logging:105 - Threshold: 0.5
+2026-01-01 09:08:33 - __main__ - DEBUG - strategy_2_add_logging:106 - Comparison: -0.5 > 0.5 = False
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:29 - Processing item: -0.5
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:38 - Item below threshold: -0.5
+2026-01-01 09:08:33 - __main__ - INFO - strategy_2_add_logging:109 - Result: None
+2026-01-01 09:08:33 - __main__ - INFO - strategy_2_add_logging:110 - 
+2026-01-01 09:08:33 - __main__ - INFO - strategy_2_add_logging:103 - --- Processing value: 0.0 ---
+2026-01-01 09:08:33 - __main__ - DEBUG - strategy_2_add_logging:104 - Value type: <class 'float'>
+2026-01-01 09:08:33 - __main__ - DEBUG - strategy_2_add_logging:105 - Threshold: 0.5
+2026-01-01 09:08:33 - __main__ - DEBUG - strategy_2_add_logging:106 - Comparison: 0.0 > 0.5 = False
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:29 - Processing item: 0.0
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:38 - Item below threshold: 0.0
+2026-01-01 09:08:33 - __main__ - INFO - strategy_2_add_logging:109 - Result: None
+2026-01-01 09:08:33 - __main__ - INFO - strategy_2_add_logging:110 - 
+2026-01-01 09:08:33 - __main__ - INFO - strategy_2_add_logging:103 - --- Processing value: 0.5 ---
+2026-01-01 09:08:33 - __main__ - DEBUG - strategy_2_add_logging:104 - Value type: <class 'float'>
+2026-01-01 09:08:33 - __main__ - DEBUG - strategy_2_add_logging:105 - Threshold: 0.5
+2026-01-01 09:08:33 - __main__ - DEBUG - strategy_2_add_logging:106 - Comparison: 0.5 > 0.5 = False
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:29 - Processing item: 0.5
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:38 - Item below threshold: 0.5
+2026-01-01 09:08:33 - __main__ - INFO - strategy_2_add_logging:109 - Result: None
+2026-01-01 09:08:33 - __main__ - INFO - strategy_2_add_logging:110 - 
+2026-01-01 09:08:33 - __main__ - INFO - strategy_2_add_logging:103 - --- Processing value: 1.0 ---
+2026-01-01 09:08:33 - __main__ - DEBUG - strategy_2_add_logging:104 - Value type: <class 'float'>
+2026-01-01 09:08:33 - __main__ - DEBUG - strategy_2_add_logging:105 - Threshold: 0.5
+2026-01-01 09:08:33 - __main__ - DEBUG - strategy_2_add_logging:106 - Comparison: 1.0 > 0.5 = True
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:29 - Processing item: 1.0
+2026-01-01 09:08:33 - __main__ - DEBUG - process_item:35 - Item processed: 1.0 -> 2.0
+2026-01-01 09:08:33 - __main__ - INFO - strategy_2_add_logging:109 - Result: 2.0
+2026-01-01 09:08:33 - __main__ - INFO - strategy_2_add_logging:110 - 
+2026-01-01 09:08:33 - __main__ - INFO - strategy_3_check_assumptions:118 - ============================================================
+2026-01-01 09:08:33 - __main__ - INFO - strategy_3_check_assumptions:119 - Strategy 3: Check Your Assumptions
+2026-01-01 09:08:33 - __main__ - INFO - strategy_3_check_assumptions:120 - ============================================================
+2026-01-01 09:08:33 - __main__ - INFO - __init__:22 - Initialized DataProcessor with threshold=0.5
+2026-01-01 09:08:33 - __main__ - INFO - strategy_3_check_assumptions:155 - Test: Normal case - value=0.6
+2026-01-01 09:08:33 - __main__ - DEBUG - safe_process_item:124 - Processing: 0.6
+2026-01-01 09:08:33 - __main__ - INFO - strategy_3_check_assumptions:157 -   Result: 1.2
+2026-01-01 09:08:33 - __main__ - INFO - strategy_3_check_assumptions:158 - 
+2026-01-01 09:08:33 - __main__ - INFO - strategy_3_check_assumptions:155 - Test: Edge case (at threshold) - value=0.5
+2026-01-01 09:08:33 - __main__ - DEBUG - safe_process_item:124 - Processing: 0.5
+2026-01-01 09:08:33 - __main__ - INFO - strategy_3_check_assumptions:157 -   Result: None
+2026-01-01 09:08:33 - __main__ - INFO - strategy_3_check_assumptions:158 - 
+2026-01-01 09:08:33 - __main__ - INFO - strategy_3_check_assumptions:155 - Test: Below threshold - value=0.4
+2026-01-01 09:08:33 - __main__ - DEBUG - safe_process_item:124 - Processing: 0.4
+2026-01-01 09:08:33 - __main__ - INFO - strategy_3_check_assumptions:157 -   Result: None
+2026-01-01 09:08:33 - __main__ - INFO - strategy_3_check_assumptions:158 - 
+2026-01-01 09:08:33 - __main__ - INFO - strategy_3_check_assumptions:155 - Test: Negative value - value=-0.5
+2026-01-01 09:08:33 - __main__ - DEBUG - safe_process_item:124 - Processing: -0.5
+2026-01-01 09:08:33 - __main__ - WARNING - safe_process_item:132 - Assumption violated: negative value encountered: -0.5
+2026-01-01 09:08:33 - __main__ - INFO - strategy_3_check_assumptions:157 -   Result: None
+2026-01-01 09:08:33 - __main__ - INFO - strategy_3_check_assumptions:158 - 
+2026-01-01 09:08:33 - __main__ - INFO - strategy_3_check_assumptions:155 - Test: Zero - value=0.0
+2026-01-01 09:08:33 - __main__ - DEBUG - safe_process_item:124 - Processing: 0.0
+2026-01-01 09:08:34 - __main__ - INFO - strategy_3_check_assumptions:157 -   Result: None
+2026-01-01 09:08:34 - __main__ - INFO - strategy_3_check_assumptions:158 - 
+2026-01-01 09:08:34 - __main__ - INFO - strategy_4_isolate_problem:166 - ============================================================
+2026-01-01 09:08:34 - __main__ - INFO - strategy_4_isolate_problem:167 - Strategy 4: Isolate the Problem - Minimal Example
+2026-01-01 09:08:34 - __main__ - INFO - strategy_4_isolate_problem:168 - ============================================================
+2026-01-01 09:08:34 - __main__ - INFO - strategy_4_isolate_problem:174 - Minimal example:
+2026-01-01 09:08:34 - __main__ - INFO - strategy_4_isolate_problem:175 -   threshold = 0.5
+2026-01-01 09:08:34 - __main__ - INFO - strategy_4_isolate_problem:176 -   value = -0.3
+2026-01-01 09:08:34 - __main__ - INFO - strategy_4_isolate_problem:177 -   value > threshold = False
+2026-01-01 09:08:34 - __main__ - INFO - strategy_4_isolate_problem:184 -   Result: None (below threshold)
+2026-01-01 09:08:34 - __main__ - INFO - strategy_4_isolate_problem:186 - 
+2026-01-01 09:08:34 - __main__ - INFO - strategy_4_isolate_problem:187 - Issue: Negative values shouldn't be processed, but the
+2026-01-01 09:08:34 - __main__ - INFO - strategy_4_isolate_problem:188 -        comparison 'value > threshold' is True for some negatives!
