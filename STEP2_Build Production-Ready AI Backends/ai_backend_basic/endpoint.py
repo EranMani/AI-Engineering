@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
+from worker import simulate_heavy_ai_task
 
 # Setup a specific router for this logic
 # use this to group related endpoints
@@ -17,16 +18,15 @@ class EventSchema(BaseModel):
 # async allows the server to handle other incoming requests instead of freezing.
 @events_router.post("/event-handler")
 async def handle_event(event: EventSchema):
-    """Receives an event, validates it and process it"""
-    # NOTE: In real app, the ai/llm chain logic goes here
-    print(f"--- Incoming Event ---")
-    print(f"ID: {event.event_id}")
-    print(f"Type: {event.event_type}")
-    print(f"Payload: {event.data}")
-
-    # always return a structured response
+    # 1. Send the task to Celery
+    # We use .delay() to send it to the background.
+    # This returns IMMEDIATELY. It does not wait for the 10s sleep.
+    task = simulate_heavy_ai_task.delay(event.event_id, event.data)
+    
+    # 2. Return the Task ID to the user
+    # The user can use this ID later to check if the job is done.
     return {
-        "status": "accepted",
-        "message": "Data received and validation passed",
-        "processed_id": event.event_id
+        "status": "processing", 
+        "task_id": task.id,
+        "message": "Your request is queued. Check back later."
     }
