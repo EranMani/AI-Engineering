@@ -42,6 +42,15 @@ def get_upload_dir() -> Path:
     upload_dir.mkdir(parents=True, exist_ok=True)
     return upload_dir
 
+def get_results_dir() -> Path:
+    """
+    Get the directory for storing analysis results.
+    Creates the directory if it doesn't exist.
+    """
+    results_dir = Path(os.getenv("RESULTS_DIR", "results"))
+    results_dir.mkdir(parents=True, exist_ok=True)
+    return results_dir
+
 def get_max_file_size() -> int:
     """Get maxiumu file size in bytes.
     Defaults to 10MB (10 * 1024 * 1024)
