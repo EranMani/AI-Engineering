@@ -2,10 +2,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
 # the connection URL
-DATABASE_URL = "sqlite:///api_database.db"
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:Erdisha_24800@localhost/fastapidb"
 
 # the engine
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 # the session factory
 # it will create a new session for each request
