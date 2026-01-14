@@ -21,6 +21,7 @@ def run_app():
         print("User already exists!. Logging in...")
 
         login_response = requests.get(f"{BASE_URL}/users/name/{user_name}")
+        print(login_response)
         if login_response.status_code == 200:
             data = login_response.json()
             my_user_id = data["user_id"]
