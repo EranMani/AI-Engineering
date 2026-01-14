@@ -33,12 +33,14 @@ def run_app():
     if my_user_id:
         # create post
         post_title = input("\nWrite a new post title: ")
+        post_content = input("Write the post content: ")
 
         print(f"Posting '{post_title}' as User ID {my_user_id}...")
 
         # inject the user_id captured earlier
         post_payload = {
             "title": post_title,
+            "content": post_content,
             "user_id": my_user_id
         }
 

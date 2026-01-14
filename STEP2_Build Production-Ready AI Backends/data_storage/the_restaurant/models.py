@@ -14,5 +14,9 @@ class PostDB(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String)
 
+    # --- NEW COLUMN ---
+    # nullable=True is required for existing rows!
+    content: Mapped[str] = mapped_column(String, nullable=True)
+
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     user: Mapped["UserDB"] = relationship(back_populates="posts")

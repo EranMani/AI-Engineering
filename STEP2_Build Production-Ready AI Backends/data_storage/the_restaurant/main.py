@@ -47,11 +47,11 @@ def create_post(post_data: schemas.PostSchema, db: Session = Depends(get_db)):
 
     user_name = existing_user.name
 
-    post = models.PostDB(title=post_data.title, user=existing_user)
+    post = models.PostDB(title=post_data.title, user=existing_user, content=post_data.content)
     db.add(post)
     db.commit()
 
-    return {"message": "Post created!", "post_title": post_data.title, "user_name": user_name}
+    return {"message": "Post created!", "post_title": post_data.title, "post_content": post_data.content, "user_name": user_name}
 
 @app.get("/users/")
 def get_users(db: Session = Depends(get_db)):
