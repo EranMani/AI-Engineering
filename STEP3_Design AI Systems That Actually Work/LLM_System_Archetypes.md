@@ -6,6 +6,19 @@ In the early days, everyone thought LLMs were just chatbots. As an engineer, you
 
 Here are the main archetypes we build in production:
 
+**Core Systems (5):**
+1. Document Processing (Extractor)
+2. Personal Assistants (Interface)
+3. Content Generation (Creator)
+4. Backend Automation (Router)
+5. Multi-Agent Workflows (Orchestrator)
+
+**Extended Systems (4):**
+6. Question Answering Systems (Knowledge Base)
+7. Code Generation & Analysis (Developer)
+8. Translation Systems (Translator)
+9. Recommender Systems (Ranker)
+
 ---
 
 ## 1. Document Processing (The "Extractor") 📄
@@ -204,6 +217,69 @@ LLM acts as a **code transformation engine** with understanding of syntax, patte
 - **Testing Integration**: Generate and run tests automatically
 - **Context Management**: Large codebase navigation, relevant file selection
 - **Safety**: Code validation, security scanning, linting
+
+---
+
+## 8. Translation Systems (The "Translator") 🌐
+
+### Goal
+Translate text between languages while preserving meaning, tone, and context.
+
+### Engineering View
+The LLM acts as a **semantic translation engine** that understands context and cultural nuances, going beyond word-for-word translation to capture intent and style.
+
+### Key Characteristics
+- **Input**: Source text in one language, target language specification
+- **Output**: Translated text maintaining meaning and tone
+- **Pattern**: Understand Context → Translate → Preserve Style → Validate
+- **Quality**: Context-aware translation, not just literal word replacement
+
+### Example Use Cases
+- Real-time chat translation in customer support systems
+- Localizing product descriptions for international markets
+- Translating technical documentation while preserving terminology
+- Multi-language content management systems
+- Translating user-generated content (reviews, comments) for global platforms
+
+### Technical Considerations
+- **Context Preservation**: Maintain domain-specific terminology and tone
+- **Batch Processing**: Efficient translation of large document sets
+- **Quality Control**: Post-translation validation, human review workflows
+- **Language Detection**: Automatic source language identification
+- **Cultural Adaptation**: Beyond translation to localization (date formats, units, cultural references)
+- **Cost Optimization**: Caching common phrases, batch processing, model selection by language pair
+
+---
+
+## 9. Recommender Systems (The "Ranker") 🎯
+
+### Goal
+Rank and recommend items (products, content, actions) based on semantic understanding of user intent and item characteristics.
+
+### Engineering View
+The LLM acts as a **semantic ranking engine** that understands user queries and item descriptions at a deeper level than traditional collaborative filtering, enabling zero-shot recommendations and handling cold-start problems.
+
+### Key Characteristics
+- **Input**: User query/context, candidate items with descriptions
+- **Output**: Ranked list of recommendations with relevance scores
+- **Pattern**: Understand Intent → Embed Items → Semantic Match → Rank → Filter
+- **Advantage**: Works without historical data, understands semantic similarity
+
+### Example Use Cases
+- E-commerce product recommendations based on natural language queries ("I need something for my outdoor camping trip")
+- Content recommendations in streaming platforms based on user preferences and content descriptions
+- Job matching systems that understand both candidate skills and job requirements semantically
+- Article/news recommendations based on reading history and article content
+- Restaurant recommendations based on dietary preferences and menu descriptions
+
+### Technical Considerations
+- **Semantic Embeddings**: Use embedding models to represent items and queries in vector space
+- **Hybrid Approaches**: Combine semantic ranking with collaborative filtering for best results
+- **Reranking**: Use LLMs to rerank top-K candidates from initial retrieval
+- **Cold Start Handling**: Recommend to new users/items without historical data
+- **Diversity**: Ensure recommendations aren't too similar (diversity vs. relevance trade-off)
+- **Real-time Updates**: Handle dynamic inventory/content changes
+- **Evaluation Metrics**: Precision@K, Recall@K, NDCG (Normalized Discounted Cumulative Gain)
 
 ---
 
