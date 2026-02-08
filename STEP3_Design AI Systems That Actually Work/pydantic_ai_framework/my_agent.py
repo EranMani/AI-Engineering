@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from enum import Enum
 from typing import Literal
 import logfire
+from datetime import datetime
 
 load_dotenv()
 
@@ -49,14 +50,30 @@ orders_db = {
 }
 
 # Define the Output Function (The "Final Tool")
-def verify_refund_logic(ctx: RunContext[UserProfile], decision: Decision, refund_amount: float, reasoning: str) -> RefundDecision:
-    """
-    Finalize the refund decision. 
-    This tool validates the business rules against the user's loyalty tier.
-    """
-
-    print(f"\n🚨 VALIDATOR IS RUNNING! Decision: {decision}, Amount: {refund_amount}") # <--- ADD THIS
+def verify_refund_logic(ctx: RunContext[UserProfile], decision: Decision, refund_amount: float, reasoning: str, date_of_purchase: str) -> RefundDecision:
     
+    # --- DEBUG PRINTS (Use -s to see these) ---
+    print(f"\n🔍 DEBUG: Validator called!")
+    print(f"   -> Input Decision: {decision}")
+    print(f"   -> Input Date: {date_of_purchase}")
+    
+    # 1. Parse Date & Calculate Duration
+    purchase_date_obj = datetime.strptime(date_of_purchase, "%Y-%m-%d")
+    days_passed = (datetime.now() - purchase_date_obj).days
+    print(f"   -> Days Passed: {days_passed}")
+
+    # 2. THE LOGIC CHECK
+    # We only raise an error if the order is OLD (>30 days) AND the agent tried to APPROVE it.
+    is_old = days_passed > 30
+    is_approving = (decision == Decision.APPROVED)
+    
+    if is_old and is_approving:
+        print("   ❌ BLOCKING: Order is old and Agent tried to APPROVE. Raising error.")
+        #raise ModelRetry("This order is too old to be refunded. Please contact customer support.")
+    
+    print("   ✅ PASS: Date check OK.")
+
+    # ... The rest of your Bronze/Silver logic goes here ...
     # Rule: Bronze users cannot be APPROVED for > $20
     if ctx.deps.loyalty_tier == LoyaltyTier.BRONZE:
         if decision == Decision.APPROVED and refund_amount > 20.0:
@@ -66,7 +83,6 @@ def verify_refund_logic(ctx: RunContext[UserProfile], decision: Decision, refund
     if decision == Decision.REJECTED and refund_amount > 0:
         raise ModelRetry("If the decision is REJECTED, the refund_amount must be 0.0.")
 
-    # If all checks pass, return the structured object
     return RefundDecision(
         decision=decision, 
         refund_amount=refund_amount, 
@@ -76,7 +92,7 @@ def verify_refund_logic(ctx: RunContext[UserProfile], decision: Decision, refund
 agent = Agent(
     model="gpt-5-nano",
     deps_type=UserProfile,
-    output_type=verify_refund_logic
+    output_type=verify_refund_logic,
 )
 
 @agent.system_prompt
@@ -126,17 +142,17 @@ def get_order(order_id: str):
     """
 
     if order_id in orders_db:
-        return {"price": orders_db[order_id]["price"]}
+        return {"price": orders_db[order_id]["price"], "purchase_date": orders_db[order_id]["date"]}
 
 
 
+if __name__ == "__main__":
+    result = agent.run_sync(user_prompt="I want to refund my order123", deps=UserProfile(id=123, name="John Doe", loyalty_tier=LoyaltyTier.BRONZE))
+    print(result.output)
 
-result = agent.run_sync(user_prompt="I want to refund my order123", deps=UserProfile(id=123, name="John Doe", loyalty_tier=LoyaltyTier.BRONZE))
-print(result.output)
-
-# NOTE: show the tool calls for this message to verify what the model actually did
-for msg in result.new_messages():
-    if msg.parts:
-        for part in msg.parts:
-            if part.part_kind == "tool-call":
-                print(f"Tool called: {part.tool_name}")
+    # NOTE: show the tool calls for this message to verify what the model actually did
+    for msg in result.new_messages():
+        if msg.parts:
+            for part in msg.parts:
+                if part.part_kind == "tool-call":
+                    print(f"Tool called: {part.tool_name}")
