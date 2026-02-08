@@ -5,11 +5,14 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "ddgs>=9.10.0",
     "dotenv>=0.9.9",
+    "duckduckgo-search>=8.1.1",
     "logfire>=4.21.0",
     "openai>=2.16.0",
     "pydantic>=2.12.5",
     "pydantic-ai>=1.52.0",
+    "pydantic-ai-slim[duckduckgo]>=1.52.0",
     "pytest>=9.0.2",
     "pytest-asyncio>=1.3.0",
 ]
