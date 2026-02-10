@@ -1,0 +1,72 @@
+🏛️ The AI Design Pattern Catalog
+1. The Router (Traffic Controller) 🚦
+Purpose: To classify intent and direct traffic to the right specialist.
+
+Why: One giant prompt is slow and confusing. Small, specialized prompts are fast and accurate.
+
+Real Life: Customer Support. "I want to return a shoe" -> Route to Returns_Agent. "Why is my internet down?" -> Route to Tech_Support_Agent.
+
+Key Code: Enum based classification.
+
+2. Parallelization (The Pit Crew) 🏎️
+Purpose: To perform multiple independent tasks simultaneously.
+
+Why: Speed. If tasks don't depend on each other, waiting for them sequentially is a waste of time.
+
+Real Life: Code Review. You don't need to finish checking Security before you start checking Style. Do both at once.
+
+Key Code: asyncio.gather(*tasks).
+
+3. Chain of Responsibility (The Assembly Line) ⛓️
+Purpose: To process data in a strict sequence where Step B needs Step A's output.
+
+Why: Decomposition. You can't write a travel blog (Step 3) until you have the itinerary (Step 2) which needs the location data (Step 1).
+
+Real Life: Content Publishing. Research -> Draft -> Edit -> SEO Optimization -> Publish.
+
+Key Code: result_a = await agent_a.run(); result_b = await agent_b.run(result_a).
+
+4. Strategy (The VIP Pass) 🎩
+Purpose: To change the tools or behavior of an agent based on the user's context (tier, role, location).
+
+Why: Security and Business Logic. A free user shouldn't even see the "Refund" tool.
+
+Real Life: SaaS Features. Admin users get delete_user() tool; Regular users only get view_profile().
+
+Key Code: tools=[...] injected dynamically or via conditional agent selection.
+
+5. Facade (The Manager) 💼
+Purpose: To provide a simple, single interface for a complex underlying system.
+
+Why: User Experience (UX). The user shouldn't need to know you have a Light Agent and a Music Agent. They just want "Party Mode."
+
+Real Life: Smart Home. "Good Morning" routine triggers lights, thermostat, coffee maker, and news reader.
+
+Key Code: One Agent with tools that call other Agents.
+
+6. Prompt Chaining (The Thread) 🧵
+Purpose: To maintain a "stream of thought" within a single task to refine quality.
+
+Why: Depth. A single prompt often forgets instructions. Breaking it into "Draft -> Critique -> Refine" forces the model to self-correct.
+
+Real Life: Email Writing. "Draft a angry email" -> "Make it polite" -> "Make it professional."
+
+Key Code: Passing result.output of the previous turn back into the prompt of the next turn.
+
+7. Evaluator-Optimizer (The Loop) 🧐
+Purpose: To guarantee quality by rejecting bad outputs and forcing retries.
+
+Why: Reliability. LLMs are probabilistic; they sometimes fail. This pattern adds a "Quality Gate."
+
+Real Life: Code Generation. "Write a function" -> "Test it" -> "It failed, fix it" -> "Test again" -> "Pass."
+
+Key Code: while score < threshold: loop with feedback injection.
+
+8. Orchestrator-Worker (The Project Plan) 🏗️
+Purpose: To handle complex, dynamic tasks that require on-the-fly planning.
+
+Why: Flexibility. The Orchestrator creates the plan at runtime based on the request, rather than following a hard-coded path.
+
+Real Life: Software Development. "Build a login page" -> Orchestrator breaks it down into DB, API, and Frontend tasks -> Workers execute them.
+
+Key Code: Lead Agent outputs a List[Task], loop iterates and assigns to Worker Agent.
