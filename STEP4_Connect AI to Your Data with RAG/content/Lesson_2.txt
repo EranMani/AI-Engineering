@@ -1,0 +1,245 @@
+Okay, so you followed everything so far.
+
+You understand that these encoder models, these vector embeddings, set of numbers that represent the
+
+meaning of the input.
+
+But what does it mean to say that numbers represent meaning?
+
+Well, let's drill down on that.
+
+How how do these vectors represent the meaning of the input?
+
+Well first up it can be referring to a character, an individual character, the meaning of a character,
+
+the meaning of a token, the meaning of a word or a sentence or a paragraph or a document or something
+
+abstract.
+
+In my day job at Nebula, we have vectors that represent different opportunities, different job postings,
+
+and vectors that represent people at different points in their career.
+
+People's careers are represented by by a vector.
+
+So vectors can can represent like like something very abstract as well.
+
+And the vectors and I said that there could be three numbers and represent like a point in space with
+
+a x, y, and a z coordinate.
+
+Uh, it can also have hundreds of dimensions.
+
+It can even have thousands of dimensions.
+
+And so that's just basically saying it's a thousand numbers that represent this, this, this block
+
+of text.
+
+But those 1000 numbers you could think of as representing a point not in three dimensional space, but
+
+in 1000 dimensional space, whatever that really means.
+
+And okay, so these represent the and some sort of an understanding of the inputs.
+
+And this is how in that points numbers that are close to each other would represent things with a similar
+
+meaning.
+
+What does that mean.
+
+Well if you imagine let's suppose it was just three numbers.
+
+So it really was an x, y and z coordinate.
+
+I keep saying z with American, but I would say x, y and a z coordinate.
+
+Uh, if it's got if it's got these, these, these points, then points that are close to each other
+
+would represent things that mean the same thing, even if the words themselves were completely different.
+
+So if you have a sentence like what are ticket prices to travel from New York to London, then that
+
+might be represented by a point right here.
+
+And you could have a completely different sentence that's like, what's the price of a flight from JFK
+
+to Heathrow Airport?
+
+Different words, different concepts, but the same meaning.
+
+And that if that were turned into a point, it should be a point that's very close in this three dimensional
+
+space to the first point.
+
+Points close to each other should represent things with a similar meaning.
+
+That's the idea.
+
+The model is trained so that it produces numbers that have this property.
+
+There is another way that these vectors represent the meaning of their inputs.
+
+And it's a bit subtle.
+
+And it was first discovered some time ago, in fact, in the before before Transformers before LMS when
+
+we were working in the field was called NLP Natural Language Processing.
+
+In some ways the predecessor to what we're doing at the moment.
+
+But but there was this algorithm called word to vec and word to vec.
+
+As I say, it's like like the predecessor to all this.
+
+It was something which would just take an individual word, uh, like a token representing a word,
+
+and map that to a vector.
+
+So each word was mapped to a vector.
+
+So you would, for example, perhaps have a vector for the word orange.
+
+And if you looked in the space at points similar to that, there would be similar things to an orange.
+
+They would be perhaps other fruits like, like, like mandarin and, and tangerine or whatever, might
+
+be similar to to to orange along with other colors perhaps.
+
+So.
+
+So there was a simple way that any one word could be mapped to a vector.
+
+And people discovered something about this that was that was intriguing and and surprising.
+
+And with apologies to those that already know this well, but still, let me just quickly go through
+
+it.
+
+So let's suppose that you take the word king.
+
+So king maps to some point in space.
+
+Imagine it's just three dimensional.
+
+It's probably thousands, but let's put it right here in space.
+
+This is King and presumably close to that.
+
+A similar things like prince and emperor and maybe Charles or whatever.
+
+So so you've got you've got the word king and similar concepts around it.
+
+And now let's suppose somewhere else completely different in space.
+
+Other words, man and woman, two different words.
+
+I'm placing them here and here also with with similar things around them man and woman.
+
+Okay, so here's the thing.
+
+You can you can do maths with these vectors where you add and subtract them, which for people that
+
+are familiar with vectors knows that that means you're sort of moving around in the space, uh, by,
+
+by, uh, by this, this amount.
+
+So we can take the word king.
+
+We can subtract the location of the vector for the word man, subtracting that x, y, and z coordinate,
+
+and add in the word woman.
+
+It's x, y, and z or z coordinate.
+
+So we're basically taking.
+
+We're subtracting man and adding woman, which is the same as moving in this direction.
+
+But we're doing it to the point king.
+
+So it's king.
+
+Take out the concept man.
+
+Add the concept woman and you end up over here somewhere.
+
+And here's the spooky part.
+
+If you looked at the closest point to this point in vector space, you ended up with a point for the
+
+word queen.
+
+So king minus man plus woman was queen.
+
+And so it's as if you can, you can mess around with meanings by by taking one of these vectors, taking
+
+out one meaning, adding in another meaning, and you're sort of moving the meaning from one to another.
+
+And similarly, you could take the word, uh, Paris.
+
+Paris.
+
+Subtract the concept of France.
+
+Add the concept of England.
+
+And lo and behold, you end up with London as your closest point.
+
+And it works.
+
+And it's crazy the first time you see this.
+
+And you play around with words and you see this working and you're like, no way.
+
+And so it's in that sense that these points represent the meaning of the input.
+
+It seems to represent it such that similar things are close by.
+
+And also so you can sort of take out meanings and add them in and it just works and it doesn't, you
+
+know, with word two vec it worked.
+
+It worked for words.
+
+But nowadays with encoder models, the same kind of thing works for entire paragraphs of text.
+
+You could take a paragraph of text, it could be mapped to a vector, and you can then remove some meaning
+
+and add in some other meaning.
+
+It doesn't matter what the actual words you choose.
+
+It matters the meaning that it represents, and you will move to another vector that reflects this,
+
+this new meaning of some input with something removed and something added in and so on.
+
+So there we go.
+
+In summary, these are the ways in which these vectors, these sets of numbers reflect the meaning of
+
+the inputs.
+
+And if I lost you a little bit there, it really doesn't matter.
+
+All you need to know is that these encoders, they take a input and they map it to a set of numbers
+
+that we call a vector embedding, but it's just a set of numbers such that numbers close to each other
+
+mean similar things.
+
+And the arrows amongst you will point out that it's it's not quite as simple as just the points close
+
+to each other.
+
+We use something called cosine similarity to decide if something's close, which is just slightly different,
+
+but it's basically that's a technicality.
+
+You don't.
+
+We'll come back to that later.
+
+It's not super important as far as we're concerned.
+
+Similar numbers means similar concepts.

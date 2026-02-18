@@ -1,0 +1,295 @@
+Okay.
+
+The time has arrived for us to cover vectors.
+
+This is the big idea.
+
+It's the big idea behind rag.
+
+It's the idea which allows us to do this sort of fuzzy lookup.
+
+Given a user's question, what might be the relevant context?
+
+That's got something to do with this question.
+
+It all comes down to these things called vectors.
+
+I imagine some of you are super familiar with this already, in which case put me on two x and zip through
+
+it.
+
+But for some of you, this is going to be fascinating.
+
+A whole new world as we launch into the world of vector embeddings and encoder.
+
+In the last four and a half weeks, we've experimented with a number of different llms with GPT, with
+
+Claude, with Gemini, deep Seek, to name a few.
+
+Grok are both Crocs.
+
+So one of the things that they all have in common is that they are they are all just one particular
+
+flavor of LLM.
+
+There are, in fact, two different types of LLM, and we've only been looking at one of them, which
+
+is by far the most common, which is the one you see all over the place.
+
+And its official name is an Regressive LM.
+
+It's a mouthful.
+
+Auto regressive LM means this is a model which is trained to do one particular job.
+
+It's trained to take an input sequence and to predict the next token.
+
+That should come after this input sequence.
+
+It's regressive in that it looks back over this input and predicts what should come next.
+
+And as you know, it does it one token at a time.
+
+It predicts the just the next token.
+
+And then the trick is we then feed in a new input that's the original input with that extra token on
+
+the end of it, and we get it to generate the next token.
+
+And that's repeated again and again.
+
+And that is what an auto regressive LM does.
+
+And the reason it does that is because that's how it's been trained.
+
+That's the architecture supports that.
+
+And then it's been given lots of training data where there's an input sequence and the next token.
+
+And so it's trained to get good at that.
+
+That's called an auto regressive LM.
+
+And if you ever just told about an LM without without any framing, it's almost certainly an auto regressive
+
+LM.
+
+That's what they mostly are.
+
+But there is another kind And the other kind goes by many different names.
+
+You sometimes hear it called an encoder.
+
+You sometimes hear them called an embedding model or a vector embedding model.
+
+But this is a model, an autoencoder.
+
+It's an LM which does not generate the next token based on looking back, but rather it takes a full
+
+input sequence, and it produces one output that is meant to reflect the full input.
+
+It's some output based on the full input that's passed in.
+
+Not not just what's to come next, but something that reflects it all.
+
+Okay, I'm being a bit abstract here.
+
+What does that mean concretely?
+
+What would be examples.
+
+Why would you want to do that?
+
+Okay.
+
+So to get concrete there are some very obvious things you might want to use this for.
+
+This idea of of taking a big input and coming up with one thing.
+
+And the most obvious application is classification.
+
+Take take an input and then classify it.
+
+This whole input to mean something.
+
+And one example of classification is sentiment analysis.
+
+Take take a whole sentence and say whether or not this is this is happy or sad, positive or negative,
+
+and other forms of classification like what does this pertain to?
+
+Uh, anything like that would be an example of where you might use an auto encoding LM and there are
+
+lots of other things like that.
+
+Whenever you might want to come up with one output that reflects the entire input.
+
+But in particular, there is one function that that is important for us, one application that we care
+
+about right now.
+
+And that is when you use, uh, one of these autoencoder models to come up with a set of numbers that
+
+best represents this input, a bunch of numbers, maybe it's ten numbers.
+
+And these ten numbers are just meant to reflect the meaning of this input in some way.
+
+And and you could think of those ten numbers as just just a list of numbers that in some way is meant
+
+to represent the concept being covered here by this, this sentence, this sequence of tokens.
+
+And when you do that because ten, ten different numbers, you could think of that as being being what
+
+a mathematician would call a vector, a set of numbers that represents a point in space.
+
+If it were three numbers, it would literally be like an x, y, and a z coordinate to a point in space.
+
+If it's if it's ten numbers, then we'd say it's a it's a point in ten dimensional space, which sounds
+
+very fancy.
+
+It's just saying it's ten different numbers that can be thought of as coordinates to this point.
+
+But but these this is called a vector embedding.
+
+When you take a set of input sequence, a set of input tokens, and then you map that to a bunch of
+
+numbers.
+
+And there are a number of examples of these used in practice.
+
+One of the very first it was called Bert.
+
+It was created by Google in 2018.
+
+It predates GPT.
+
+It was way back.
+
+It was before we even used the expression LLM.
+
+But but Bert stood for bidirectional encoding representations from transformers.
+
+And yeah, it was it was very popular then.
+
+I remember being amazed by it when I first first played with it back back then.
+
+And it's still used today, but very, very popular.
+
+OpenAI embeddings is a whole category of embedding models from OpenAI.
+
+The one that that I use is is called the text embedding.
+
+Three large.
+
+And there's also a three small as well.
+
+And then there's a very popular open source model that will be also experimenting with called the all
+
+mini LLM, L6 v2.
+
+So these are all examples of of autoencoding llms, also known as embedding models that are able to
+
+take an input, a series of tokens and turn it into a set of numbers that we call a vector.
+
+And I just want to tackle something that is a common source of confusion for people that first meet
+
+this, which is people say, okay, so what's the difference between tokens and vectors?
+
+And they are super different and it's very easy to explain.
+
+So let me demystify that right away.
+
+One way to put it is that tokens are inputs and vectors are outputs.
+
+But but basically, tokens is just a super simple way of saying we can't put words into a model.
+
+A model is a mathematical thing that adds things up and multiplies them.
+
+It can't take a word.
+
+So at the very beginning, we have to start by having like a number to represent each word, like the
+
+word, and might be number one, the might be the word number, number two, and so on, so that we
+
+can map words to a single numbers and that that's what tokens are.
+
+They're just a numeric representation of the input.
+
+It's just the input in another form.
+
+And it turns out that if you try and map every word to one of these numbers, then you have some, some
+
+issues with with with how many words like what happens when you run out of vocabulary.
+
+Uh, what do you do with proper names and things like that?
+
+At one point, we tried to have every character, every letter mapped to a number, but then things
+
+got really complicated, really fast.
+
+And so there's this, this nice, happy medium as we explored all the way back in week one, which is
+
+taking fragments of words instead of words or letters, and that just turns out to work really, really
+
+well.
+
+So there is some some hocus pocus about the the way that you create these tokens from text.
+
+But but it's basically just a sort of a mapping and a few rules, nothing fancy to it.
+
+Tokenizers are very simplistic bits of code, and the fact that you have to map text into tokens, it's
+
+just something that you go through to to come up with numbers that can be the inputs into a model that
+
+is tokens.
+
+They are the inputs.
+
+Vectors are what comes out the other side after a model, an LLM has taken in these simplistic tokens.
+
+And it's it's got some some meaning from it.
+
+It's understood the relationship between these different words.
+
+It's understood what, what point you're trying to make, how to represent this information.
+
+And it's turned it into a series of numbers that that reflect the meaning of the input.
+
+And it is an output of the model and that is a vector.
+
+So it always starts with tokens.
+
+Even encoding models take tokens as their inputs, text goes to tokens, goes into the model and what
+
+comes out is the vector.
+
+And and I know what you're thinking.
+
+The pros are thinking, okay, but it's more complicated than that because actually vectors aren't just
+
+the outputs.
+
+Vectors are also what what happens inside an LM between the various layers, you can think of the information
+
+that's moving from one layer to another as being like vectors at each point.
+
+And so, in fact, in many ways, the tokens that come in even to an autoregressive model, they start
+
+by being turned into vectors in terms of the internal representation of an LM.
+
+But that's a pro a pro thing that you don't need to worry about if you didn't follow that.
+
+All you need to really understand is that tokens are just a simple way to represent text that comes
+
+in the input.
+
+Vectors are a sort of advanced internal transformer representation of the information as a, as a,
+
+as a series of different numbers in a vector.
+
+Those are vectors, those are outputs.
+
+Or maybe there are intermediate outputs.
+
+But that is the key difference between tokens and vectors.

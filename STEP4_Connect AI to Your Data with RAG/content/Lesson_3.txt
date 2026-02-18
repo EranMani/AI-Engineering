@@ -1,0 +1,235 @@
+Okay, so enough theoretical stuff on vectors.
+
+Now I'm gonna make it real.
+
+Now I'm gonna give you the big idea behind rag.
+
+And what makes rag so interesting?
+
+Here's the point.
+
+Remember this diagram?
+
+Remember the little idea behind rag?
+
+The user asks a question.
+
+We look it up in our database.
+
+Okay.
+
+Now we're going to do something just slightly different.
+
+The user asks a question and let's say what they what they ask is what a ticket prices to Heathrow the
+
+name of London's airport.
+
+If you didn't get that.
+
+What a ticket prices to Heathrow.
+
+Okay.
+
+And and we know if we look that up in our database then there's going to be a problem because our database
+
+has ticket prices to London, not to Heathrow.
+
+So we're not going to find the word Heathrow in there.
+
+Okay.
+
+So we don't just take that question and look it up in the database.
+
+First we find a useful encoder model and encoding LM or embedding LM, whatever you call it.
+
+We use that we turn the question into a vector, we take that question.
+
+We turn it into a set of numbers that represents its meaning.
+
+And separately, we took all of our database, all of our knowledge base.
+
+And for everything in that database, we found vectors associated with that.
+
+And what we've put in our data store is the text, the information about ticket prices or whatever,
+
+along with the vector that represents that text.
+
+We've got all of that in our data store.
+
+And when you do that, when you have these vectors referring to each of these bits of data, we call
+
+it a vector data store.
+
+And that's what we've got.
+
+And what we do is we say, okay, okay, vector data store, tell me, what information do you have
+
+that is closest to this point of this question?
+
+We've just taken a question.
+
+We've turned it into a point.
+
+What information do you have that's near that in your vector data store?
+
+Because stuff that you have that's close to that is going to be things which have a similar meaning,
+
+even if there's a different choice of words.
+
+If the user said ticket prices to Heathrow Airport, it's still going to find prices to, to to the
+
+airport in London or whatever.
+
+That's going to be close to the points.
+
+And so it's going to find that information.
+
+And so this is the kind of fuzzy lookup that I mentioned before.
+
+You're not just doing a string match.
+
+You're trying to understand the meaning of the question.
+
+And you're asking, what information do I have in my database that has similar meaning to the meaning
+
+of the question?
+
+And you get that you retrieve the text from the vector data, store the text associated with these vectors,
+
+and you put that in your prompts to the LLM.
+
+So it's now got the ticket prices to London.
+
+The question how much does it cost to travel to Heathrow.
+
+This might be relevant context.
+
+Ticket prices to London is all in there.
+
+That was found in the vector data store.
+
+Back comes the response with the right answer.
+
+And here is a super important point that confuses even some pros.
+
+I just want to make this very, very clear to you.
+
+This encoder encoding LM that you see there, it has nothing to do with the LM on the right.
+
+The auto regressive LM, if you remember, is the full name for that.
+
+It's got nothing to do with that.
+
+That encoder, LM is being used just to help with this fuzzy search.
+
+We're using that to turn the question into a vector.
+
+And we've already used that same encoder to to turn all of the data that we've got in our database into
+
+vectors as well.
+
+So we're using this trick, this trick of using these vectors to pluck out relevant information.
+
+And then that's what's getting sent to the LM on the right.
+
+So what's going to the LM on the right is not vectors.
+
+The LM doesn't wouldn't know what to do with a bunch of numbers.
+
+It just it just talks natural language.
+
+The input has to be language.
+
+What's being passed in is the user's question what's the ticket prices to to Heathrow.
+
+And then relevant information plucked from the vector data store the the natural language, the English
+
+associated with that.
+
+That's what's going to the LM on the right.
+
+So the purpose of this encoder is to help us with this trick of finding relevant content, not necessarily
+
+content that has exactly the same words, but content that has the same meaning.
+
+That's what we're using it for.
+
+And what gets sent to the LM on the right is just useful context in the form of natural language.
+
+And so that's it for the first day of week five of Rag Week.
+
+That's enough.
+
+You've got your basic intuition now about vectors and about using that for a rag lookup a retrieval
+
+augmented generation.
+
+Don't worry if you didn't understand everything because we're going to actually get into this.
+
+We're going to create vectors.
+
+We're going to store vectors.
+
+And by the time we're done with it you're going to know this stuff.
+
+So, so well, uh, what you can already do, of course, is generate text and code with frontier models,
+
+use tools, use open source models with with hugging face transformers.
+
+You can choose the right model for your project backed by facts.
+
+And now you can explain about this business of vector embeddings and how you use a vector data store.
+
+Look up things similar to a user's question to put in a prompt to the LSM.
+
+By next time we'll we'll have unveiled Lang chain properly.
+
+We took a peek at it before we're going to we're going to go into it.
+
+We're going to use it to actually take a knowledge base, turn it into vectors and put it in a data
+
+store and a vector store called chroma.
+
+And what I want to leave you with is just have a think about, uh, as you mull over rag and what it
+
+is, one of the things that you might start to think is hang on, it feels like all this is a bit of
+
+a hack.
+
+It's it's it's not very scientific.
+
+We're doing this business of taking a user's question and turning it into a vector in order to try and
+
+make a guess about what's what sort of what's likely, what's plausible to be useful to put to shove
+
+in a prompt to an LLM.
+
+And so you might be thinking to yourself, this, this all sounds like, like, like a bit of a bit
+
+of a hack, uh, you know, to avoid having to put everything in the context just to sort of subselect.
+
+And the answer is, you're exactly right.
+
+It is all a bit of a hack is, is is really one big hack.
+
+And in fact, as you're going to discover later this week, rag comes with a with a whole zoo of hacks.
+
+There's hack upon hack upon hack to try and get better and better at picking the right, relevant context.
+
+It really is just this, this very hokey business of trying to use trickery with encoder models to figure
+
+out the most likely contexts that's going to be useful to the LM.
+
+So keep that in mind.
+
+This is very much it's very empirical, which is our way of saying that it's very experimental.
+
+It's it's really quite a lot of trial and error.
+
+And you're going to get a really good sense for that when we actually try and build our proper rag pipeline,
+
+uh, tomorrow and the day after.
+
+All right.
+
+I will see you tomorrow for vectors.
