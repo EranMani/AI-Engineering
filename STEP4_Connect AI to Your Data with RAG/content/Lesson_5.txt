@@ -1,0 +1,419 @@
+All right.
+
+Here we are in.
+
+So we're just going to have a quick look at Lang Chain before we continue.
+
+And actually for me this is my first time using cursor version two which just came out for me.
+
+But you've been using it all along I expect.
+
+And at the top here I see that we can now flip between the editor we're on here and agents where you
+
+you can have multiple agents running.
+
+That's the new functionality.
+
+Anyways, going into week five we're now on day two, it's vectors day.
+
+This is when we continue work with our expert knowledge worker for the insurance company, Insure Life
+
+Insurance.
+
+And we're going to be now working with taking the data in the knowledge base and vectorizing it and
+
+putting it in a vector store.
+
+So there's going to be three parts to today.
+
+We're going to first divide our documents into things called chunks, which are little little bits of
+
+the document that are useful ready to be put in our vector data store.
+
+And then we're going to turn those things into vectors.
+
+Or we're going to at least have vectors associated with each one, and then put it in and chroma and
+
+open source vector database that I'll talk about in a bit.
+
+And then we will visualize our vectors.
+
+But for now just part A let's divide our documents into chunks.
+
+And you might be thinking why do we need to divide documents into chunks and to break them up into pieces?
+
+And the reason is that imagine we've got these documents that they're going to have all sorts of different
+
+bits of information on them.
+
+We've already seen there's like employee HR records.
+
+There's stuff about products.
+
+When a user asks a question, it will probably pertain just to one part of one document.
+
+And if we just built one one vector associated with a whole document, then it's much less likely that
+
+a question is going to match directly with like an entire document like that.
+
+So it makes sense for us to try and think about how could we split up each document so that we've got
+
+the best chance that one particular fragment is something which can address a few different questions,
+
+and we've got just the right granularity for that to be true.
+
+And figuring out how to take documents and divide them into chunks is an example of of of one part of
+
+working with Rag that is super experimental, full of trial and error.
+
+There's no one rule to get chunking right, as we will see when we experiment with them.
+
+Anyway, that's the quick introduction.
+
+Here are some imports.
+
+There's a ton of imports we're doing here, and a lot of these are long chain related imports.
+
+Let's just take a quick look at them.
+
+Lang chain has a number of different packages and the different packages.
+
+You have to be pip installed or you've added separately.
+
+And they typically have different sets of dependencies.
+
+So there's one here for lang chain underscore OpenAI which is all of their classes related to OpenAI.
+
+There's one for for Chromo the database we're going to be using.
+
+There's one for hugging face classes.
+
+There's there's a set of document loaders, which are its tools for loading documents, which are in
+
+the Lang chain community, which is a bit like our community contributions.
+
+It's where people have added in open source contributions and then text splitters, which is a particular
+
+part of Lang Chain that's responsible for taking documents and turning them into chunks.
+
+So, as I say, it's an example of how Lang chain is quite heavyweight, that there are many different
+
+packages.
+
+If you remember with light LM there was there was only one package and it was it was just super simple.
+
+You import the one package, you can use any LM.
+
+So it just gives you a sense there's a lot going on, there's a lot of functionality.
+
+But it's it's there's also a lot to sort of learn about sign up for okay.
+
+So we do these imports.
+
+And interestingly it does take a fair bit of time to import all of this.
+
+There's such a lot going on.
+
+We're going to use GPT four one nano because we particularly want to do something which is going to
+
+be cheap and fast.
+
+And GPT four one nano is both of those things.
+
+We're going to be storing our documents in a vector database, which we'll come to later.
+
+It's going to be called vector DB.
+
+And let's also check that we've got an open AI key we have.
+
+All is good.
+
+All right.
+
+Next up we're going to load in our documents.
+
+So before we use any Lang chain code at all, I just want to examine these documents.
+
+First of all, I've got something here which is going to to use glob.
+
+Glob.
+
+If you remember that our way of a way of like walking through our directory structure for anything in
+
+the knowledge base directory that contains that is a markdown file.
+
+And we'll find out how many files we've got.
+
+I'm going to load all of them in to one variable called entire knowledge base.
+
+And I'm going to print how many characters do we have in the whole thing.
+
+So there's 76 different files in this knowledge base.
+
+And there's a total of 300,000 characters.
+
+And I'm going to use a library called Tick token.
+
+You might remember, I think we looked at that like we one uh, to, to look at how many tokens there
+
+are in this and count up the number of tokens.
+
+And there are apparently almost 64,000 tokens.
+
+If you take the entire knowledge base and you tokenize it.
+
+And for those that remember some of the leaderboards we looked at like, like Valium.
+
+You'll you'll realize that actually, that is something which we could squeeze into the context window
+
+for any of the major models.
+
+So you could, in fact, put the entire knowledge base I've got here.
+
+All of these directories, everything here could fit into a call to open AI.
+
+Now it would start to be a little bit more, more pricey every time you call it.
+
+With that entire context.
+
+It's a bit like putting all of hamlet in every single time, but it could be done.
+
+But the point here is that this data imagine that it was ten times bigger.
+
+Imagine that it was 100 times bigger.
+
+You would very quickly get to a point where you couldn't do it.
+
+And now I didn't want to do that because it would it would be unwieldy and it would start costing costing
+
+money.
+
+Uh, but but that's what you have to keep in mind.
+
+The idea of Rag is to be able to scale and support massive knowledge bases and still be able to get
+
+expertise, still be able to get high quality answers when we call the LLM.
+
+And indeed, in week eight, we're going to do a knowledge base with 400,000 documents.
+
+So we are going to scale.
+
+You will see that.
+
+And in my AI in production course we also use use much bigger scale.
+
+So so these this this example is like a medium scale just to give you a sense of it.
+
+But just picture going up by by two orders of magnitude.
+
+The same will apply.
+
+Okay.
+
+Finally time for some long chain code.
+
+We're going to load in these documents and turn them into a long chain object called a document, which
+
+represents each document.
+
+And this code is doing it's not very much.
+
+It's looks like there's a lot of code here.
+
+Uh, okay.
+
+But what we're doing is we've again, we've got we're using this glob glob to get a list of all of the
+
+folders.
+
+Each of these company contracts employees products into a variable called folders.
+
+And then we're going to say for oh, sorry, I just spelt that wrong.
+
+I somehow got that changed.
+
+There we go.
+
+Folders.
+
+Uh, so we're going to uh, we're going to, to take a documents list, an empty list.
+
+We're going to walk through each of these folders.
+
+For each one, we're going to say that the document type will just be the the name of that directory
+
+which whichever directory it is.
+
+And then we're going to use this lang chain community class called directory loader, which is something
+
+that can take a whole directory load in everything in there.
+
+And this here makes sure that it works on PCs as well as Macs.
+
+We will then bring that in.
+
+And for each document we will we will set something called doc type to be the type of document.
+
+And we will add that to to this list of documents.
+
+Okay.
+
+So if I'm then going to do print I'll do that cursor fill in for me.
+
+Print that we've loaded however many documents we've loaded.
+
+So this this is using the Lang chain loader classes to load in each of our documents.
+
+It's not that much more more sophisticated than what we did yesterday when we just loaded in documents
+
+as a string.
+
+But each of these things, if we just look at one of them, let's look at Documents Zero and look at
+
+it.
+
+It is a Lang chain object called a document, it has metadata.
+
+The source is where it came from.
+
+The doc type, the thing that we just put in there ourselves.
+
+This line right here, the doc type is the word products.
+
+Because this first thing is a product.
+
+And then page content is the complete contents of that page.
+
+So those are the fields in this object document.
+
+And you can check this out yourself and, and go through them and look at them and get a sense of what
+
+we have just loaded into the documents list.
+
+And now it's time to split each document into chunks.
+
+And splitting something into chunks is, uh, again, it's very experimental.
+
+It's very empirical.
+
+You try different things.
+
+There are a number of different things called text splitters, which are different classes in long chain
+
+that let you break down a document into smaller pieces.
+
+The very simplest one is just called the character text splitter.
+
+And it does basically what it says on the tin.
+
+It just chops it up by characters.
+
+There's a slightly more sophisticated version called the recursive character text splitter.
+
+Again, it sounds it sounds like it's something fancy, this one, but it's not.
+
+It's it's recursive and it just tries to.
+
+It first tries to split things by wherever there's a couple of empty lines between sections, and then
+
+it tries to do it by just one empty line and then just by end of sentences and things like that.
+
+So it has like a sort of hierarchy of how it tries to split up documents so that it's doing its best
+
+job at trying to break it where it thinks there's a natural break in the documents and you tell it.
+
+How many characters do you want roughly in each chunk, and how much overlap would you like there to
+
+be between different chunks?
+
+Because if you think about it, when you when we ask a question, there might be it's possible that
+
+a question will be answered by, by one paragraph.
+
+Uh, or it might be the answer, you know, if we if we just split the document, it's possible that
+
+the answer to our question would be somewhere in the middle, and that would be problematic.
+
+So by having an overlap with each of our chunks, we make it less likely that we would sort of chop
+
+an answer in half, but that it should often be the case that a particular question will map nicely
+
+to at least one chunk.
+
+So this is all some of the thought process that goes into chunking.
+
+But as you will, as you will discover, if you're wondering like what's the process for this?
+
+The answer is going to be trial and error.
+
+You experiment, you try different chunking strategies and see which one works best.
+
+And I know what you're thinking.
+
+You're thinking, okay, but what does it mean to work best?
+
+How do you know that a chunking strategy is working best?
+
+And that's an excellent thought for you to have.
+
+And fear not, we will cover that.
+
+That is one of the most essential aspects of of a Rag workflow that we'll be covering later in the week.
+
+But enough enough talk.
+
+Let me run this.
+
+We have just divided our documents, our 76 documents into 413 chunks.
+
+And here's the first one.
+
+It's just a chunk of the product summary.
+
+It's a chunk of this thing right here.
+
+Uh, so that's one of them.
+
+Let's, let's go through and just look at another one.
+
+Let's look at chunks.
+
+Uh, whatever.
+
+Number 100.
+
+Let's see what number 100 is.
+
+It's a chunk out of, um, the source, uh, thing and the source, the source document.
+
+And it begins with seven business continuity.
+
+So it's just a fragment of the document, 413 chunks.
+
+What happens if we change the chunk size down to 800?
+
+Then we end up with 532 chunks, more chunks, because they each have a smaller size.
+
+And we'll put it back to 1000.
+
+And you should try this out.
+
+Get a sense of it, get a sense of what this chunk overlap looks like.
+
+Convince yourself there's nothing very clever going on here.
+
+It is basically just dividing up the documents.
+
+You get different numbers of chunks if you have a different chunk size.
+
+Um, and, and uh, you can use you can, you can look up the different kinds of text splitter that
+
+you could try out here if you wanted to get deeper into this idea of turning documents into useful chunks.
+
+Okay.
+
+That is our first quick look at Lang Chain.
+
+We're going to go back and explore a little bit more about vector embeddings and vectors.
+
+And then we'll come right back here.

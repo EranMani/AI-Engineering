@@ -1,0 +1,267 @@
+I've been looking forward to today for some time.
+
+I have a total treat in store for you today.
+
+I, I feel jealous that you are where you are, having not experienced what I have in store for you
+
+today and it's all about to happen to you.
+
+You you probably think I'm being over the top, but wait and see.
+
+All right.
+
+What is it about today that I'm so excited about?
+
+Well, this is the day of vectors for Rag.
+
+I'm going to introduce Lang chain.
+
+Such a.
+
+I mean, we've been introduced to it before, but we're going to go deeper on Lang Chain.
+
+And I'm going to introduce you to, to looking actually at vectors, putting them in chroma and visualizing
+
+them in chroma.
+
+As a reminder of what you can already do, you can already generate text.
+
+You can generate code with frontier models, with assistance tools, with open source models, you can
+
+confidently choose the right model for your project.
+
+And at this point, you can explain the big idea behind Rag, the fact that you use vectors to do a
+
+sort of semantic search.
+
+A fuzzy search to find relevant content.
+
+That's the big idea.
+
+That's what we're going to use to go from that rather simplistic thing that we did yesterday.
+
+There's something rather more powerful.
+
+And by the end of today, you're going to be able to explain long chain, the good and the bad.
+
+You're going to be able to work with popular encoders, embedding models as they're also known.
+
+And you'll be able to divide documents into chunks, turn chunks into vectors, put vectors in a vector
+
+data, store all of that all in one day.
+
+And it's today.
+
+Okay, before we dig in, let's do a super quick recap of what we went through yesterday.
+
+I know you already get it, but it's important to reinforce.
+
+So the user asks a question.
+
+We did something pretty janky yesterday when we took that question.
+
+We just sort of broke it into words and we saw, do we have anything about these words?
+
+But that's not a great way of doing it because you may miss important information.
+
+You really want to do some kind of a fuzzy search on that text.
+
+Okay, here's a way to do that.
+
+Bring in an encoding LL.M.
+
+An and Lmw that creates a vector that represents the meaning of the question.
+
+Turn the question into a vector.
+
+Look that up in a vector data.
+
+Store a database which is quick at finding similar information to the vector that you just passed in,
+
+and then collect this information that we've got.
+
+Pass that in the prompt to the LM.
+
+And what we'll get back is something which is based on that context, that relevant context that we've
+
+passed in in the prompt.
+
+Okay.
+
+Let's now talk about lang chains.
+
+So you met Lang Chain briefly uh, earlier on.
+
+But now we're going to go deeper on lang chain.
+
+So Lang chains are an open source framework.
+
+It was launched October 2022 by someone called Harrison Chase who who started this and then later formed
+
+a company around it.
+
+It is a common framework.
+
+We sometimes call these abstraction layers that allows you to interface with many different models and
+
+also stitch them together, building things like rag pipelines that we'll be doing.
+
+And there was a new version of Lang Chain, released very recently, October 2025, which is quite significant
+
+overhaul including repackaging much of Lang chain.
+
+So there really is a kind of a pre 1.0 and a post 1.0, and we will work with 1.0 with the new version
+
+of Lang Chain today as we dig in to this, this, this framework, um, this abstraction layer that
+
+lets you glue together, chain together different llms to accomplish a business task and to introduce
+
+the like the pros and cons of Lang chain, the good and the bad.
+
+So a few a few pros.
+
+First of all, Lang chain is something that makes it much quicker to glue together llms to accomplish
+
+something.
+
+So for things like assistants or for rag that will do or for summarization tasks, it means you can
+
+get to market much quicker.
+
+Things like using tools.
+
+There's a there's a very robust set of tools that comes with it.
+
+This sort of stuff very quick to do out of the box.
+
+That's what Langshan gives you.
+
+There's also a lot of adoption in the enterprise.
+
+Langshan was extremely popular when it first came out, and during 2023, it really, really took off
+
+in a big way.
+
+So it's very common in enterprise.
+
+A lot of projects use Langshan, so it's often it's a good, good resume material.
+
+It's good to have it there.
+
+It's something that you know how to do.
+
+You will frequently come across it.
+
+So in terms of some of the downsides of Langshan, probably the first thing I'll mention is that when
+
+Langshan first came along in like 2223, it was quite different to make calls to to OpenAI and to anthropic
+
+and to Gemini if you did it yourself.
+
+And so there was a huge need for something like Langshan that unified and brought this together and
+
+made it so you could switch around different models.
+
+But since then, times have changed.
+
+And now, as you've experienced yourself, because all the providers have OpenAI compatible endpoints,
+
+it's incredibly simple to switch between different models just using the OpenAI Python client library,
+
+and you can just switch out the base URL, which can just be configuration and move between different
+
+providers.
+
+So there's less need for this kind of abstraction layer built on top.
+
+And also some of the other things that that this was, that was set out to, to simplify, like using
+
+tools and using prompt templates, they've all sort of converged over time.
+
+There are now very common patterns for doing all of these things.
+
+So there's there's less of a need for long chain at this point.
+
+So that's obviously a downside.
+
+And the other downside is perhaps more debatable and is perhaps a matter of personal taste.
+
+But Langston originally was considered to be a fairly lightweight abstraction layer.
+
+But over time it has grown and grown, and it's now reasonably heavyweight.
+
+It's pretty substantive in terms of everything it offers.
+
+It has.
+
+It has a lot of terminology, some concepts, some things to learn.
+
+It even has its own language, LCL, that hasn't really taken off, but that's also part of it too.
+
+And and some people do use that.
+
+And so it's actually become quite a heavyweight abstraction layer.
+
+There's a lot of learning.
+
+There's quite a learning curve to go into the Lang chain ecosystem.
+
+And nowadays there are other abstraction layers like light LM that we met that are really very lightweight
+
+indeed.
+
+And that can you can use things like light LM very easily with a tiny learning curve and switch between
+
+different models, where lang chain is a lot more to sign up for.
+
+And so as a result, lang chain has started to feel a bit more like it's like a legacy product with
+
+with a big learning curve and with stuff that's kind of hung over from, from a prior age, like the
+
+human message and AI message stuff.
+
+If you know that which has been replaced really in people's minds with a very simple list of dicts that
+
+we're so familiar with from OpenAI.
+
+So from that point of view, Lang Chain can feel a bit heavy, quite a big learning curve.
+
+There are lighter things available like light, little lamb and and some of it is perhaps less needed.
+
+So I wanted to give you that kind of candid pros and cons.
+
+You're going to get a personal first hand assessment of it yourself in the next few days.
+
+As we work with it, it's as I say, you're going to see the best of Long Chain, and maybe you're also
+
+going to see some some of the rough edges.
+
+It's going to be so easy to build a rag pipeline.
+
+We're going to have it all together, a couple of lines of code.
+
+We're going to have ourselves a rag pipeline.
+
+It's going to be fantastic.
+
+But you may also see some of the bit of the learning curve terminology, extra stuff that comes with
+
+the mix.
+
+And of course, Lang chain itself is now it's part of the Lang Chain Company.
+
+They have other offerings too.
+
+They have Lang graph, which is something very different.
+
+Uh, used to, to, to connect together agents in a dependency graph that we cover in my agent course,
+
+they have Lang Smith, which is an observability platform.
+
+Um, and they have some other things as well.
+
+So, so there's, there's a big ecosystem built around Lang chain, and there's a lot to like about
+
+it.
+
+And a couple of things to watch out for as we will see.

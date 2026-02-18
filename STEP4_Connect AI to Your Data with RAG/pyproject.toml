@@ -1,0 +1,12 @@
+[project]
+name = "step4-connect-ai-to-your-data-with-rag"
+version = "0.1.0"
+description = "Learning LangChain from Zero to Hero - RAG Application"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "langchain>=0.3.0",
+    "langchain-openai>=0.2.0",
+    "langchain-community>=0.3.0",
+    "python-dotenv>=1.0.0",
+]
