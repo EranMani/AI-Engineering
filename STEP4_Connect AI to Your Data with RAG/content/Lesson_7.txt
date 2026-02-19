@@ -1,0 +1,359 @@
+And welcome back to and welcome back to right where we left off before I did that little detour.
+
+Uh, so you remember, of course, that we just took our documents.
+
+We broke them into chunks.
+
+I think you got the idea of chunks now.
+
+413 of them.
+
+Uh, there they all are.
+
+We are now going to make vectors and store this in chroma.
+
+And we're going to use the open source embedding model or mini lm, l6 v2 from Huggingface.
+
+Now, look, I do believe that you do not need to be logged in to Huggingface to use this model.
+
+It's something that's just available publicly.
+
+Uh, but just in case, if you have if you do get any hugging face login, uh, error, then you remember
+
+that in week three we set up a hugging face token.
+
+HF token, please.
+
+If you get a problem with logging in, then add that token to your EMV file and be sure to rerun EMV.
+
+But I don't think it's needed.
+
+It shouldn't shouldn't happen to you.
+
+We'll need this for week eight anyway, so you might want to do it anyway.
+
+But but but regardless.
+
+Okay.
+
+So we're going to start by creating a new variable embeddings.
+
+And we're going to create an instance of this hugging face embeddings object.
+
+And this is part of Langerhans Code.
+
+And we tell it the model name.
+
+We want to use the all mini lm, l6, v2.
+
+There it is.
+
+And what we do here, this is saying uh, it's checking to see whether or not there is already uh,
+
+a thing called vector underscore db, which is what we called our database.
+
+And I do have that because I've run this before and it says if it exists then come in and make sure
+
+we wipe it so that we're starting fresh.
+
+So that allows you to run this many times again and again.
+
+And every time it will wipe it if it exists.
+
+And if not, it will create a new one.
+
+Okay.
+
+And now look at this line the vector store.
+
+We're creating a vector store.
+
+We use this this word chroma.
+
+This is another it's a long chain object that represents the chroma database a free open source database
+
+that actually has SQLite running behind it that will just get created just like that on your computer
+
+without you needing to do any more work.
+
+Chromium documents.
+
+And the thing we pass in as our documents that we want to create in our vector data store is the chunks
+
+that we just made are how many were there?
+
+400 and something chunks 413.
+
+Chunks 413 chunks.
+
+We passed them in and we also pass in the embedding model, the encoder, this thing here, the hugging
+
+face embeddings.
+
+And we tell it the name of the directory where it's stored.
+
+That is how we create our chroma database with the chunks, with the embeddings, with the directory
+
+name to create.
+
+That's what we do.
+
+And this is when I say that it's easy with with encode to sort of conflate the database with the embedding
+
+model.
+
+You can see you just sort of pass it all in together to create chroma.
+
+But this embedding model isn't isn't really associated with chroma.
+
+It's different.
+
+It just it could be any embedding model we could pass in there.
+
+Anyway, let's run this.
+
+It's now going.
+
+It's taking all of those documents, all 413 of them, turning them into vectors, putting them in the
+
+vector store.
+
+That's happened.
+
+It just all happened.
+
+And this directory vector db, if I open it up, it's full of SQL Lite sort of stuff, which is in fact
+
+a database with 413 chunks in it.
+
+How about that?
+
+If you just ran that, you just created your very first vector data store.
+
+Congrats.
+
+So next we're just going to dig into the vector data store to look at what we've got here.
+
+So a collection is the name of like.
+
+Like what in relational databases we would think of as like a table.
+
+So we've got we've only got one collection.
+
+So we bring it in as a, as a variable collection.
+
+And we asked for its count.
+
+How many things do we have.
+
+And we also just get one one of the of the objects in there.
+
+One of them we find out how many dimensions does it have.
+
+Let's have a look.
+
+So we've got 413 vectors in Cromer with 384 dimensions.
+
+Mentions.
+
+So that means there's like 384 numbers associated with each of those vectors.
+
+And if again, I know I think you know this, but those 384 dimensions, that's not a that's not a feature
+
+of Cromer.
+
+Cromer can take vectors of any size.
+
+It's a feature of the hugging face all mini lm, l6, v2 embedding model that turns text into this 384
+
+dimensional vector.
+
+That's where the vectors have come from.
+
+Okay, now for the best part.
+
+It's time for us to visualize.
+
+So I am a big believer in visualizing your data and seeing it and exploring it, something that we will
+
+be doing many times over the next few weeks.
+
+And this is no exception.
+
+And visualizing information represented in vectors can be particularly insightful and interesting.
+
+Gives you a way to spot outliers and interesting trends or problematic trends.
+
+It's just a great thing to do.
+
+And it's also from an education point of view, it's very, very helpful to give you like a real intuition
+
+for what does it mean to have our data represented by vectors?
+
+What does that actually mean?
+
+Well, you're going to see it and it's going to give you some clues.
+
+So first up I'm going to just just just pull out from our database a list of the vectors, a list of
+
+the documents which really the chunks, the metadata associated with each one.
+
+Um, the doc types.
+
+And then I'm also going to have a color, uh, that will pick based on whether it's a product, employee,
+
+contract or company.
+
+So that is what we will do.
+
+Um, and uh, what we're now going to do is, is bring this up just to see what it looks like visually.
+
+But there's a problem and, and, and the problem is with you and me, uh, the problem is that we humans,
+
+we humans have a limitation that we're not very good at seeing anything above three dimensions.
+
+We can't see things in 384 dimensions because we don't have any idea what that even means?
+
+Uh, so that is that is a problem.
+
+But luckily, mathematicians have come along to to put us out of our misery.
+
+There is a technique.
+
+There are a few techniques.
+
+There's one called PCA, there's one called t-SNE, which we're going to use.
+
+t-SNE stands for T-distributed.
+
+Stochastic neighbor embedding just rolls off the tongue.
+
+You don't need to know that you don't know what it stands for, but what you do need to know is that
+
+t-SNE is a very popular technique for taking higher dimensional data and projecting it down, say,
+
+to two dimensions, um, such that things that are close together in 2D are likely to be close together
+
+in multi-dimensional space, and things that are far apart in 2D are likely to be far apart.
+
+It's a statistical technique.
+
+You can you can Google it to read all about it.
+
+On Wikipedia.
+
+It's very common.
+
+Uh, so we are going to to run t-SNE and we're going to ask it to, to project down to two dimensions.
+
+It's going to use, uh, this random state means it should, should come up with the same answer each
+
+time.
+
+Uh, and we are then going to plot it so that we can see what this looks like when it's displayed in
+
+2D.
+
+Okay, here we go.
+
+We run it and bam!
+
+This appears.
+
+Now you may see some warnings.
+
+It may give you some hugging face related warning about something about threads.
+
+Ignore that.
+
+It's nothing you often get warnings with with sort of open source software.
+
+The frontier and warnings can can usually be just just noted down in case something goes wrong later
+
+to come back to.
+
+In this case, it's nothing.
+
+All right.
+
+Anyway, take a moment to absorb this.
+
+And it's like, wow, what are you looking at here?
+
+What is this?
+
+So this is like a, like a map of our data.
+
+And if you move your mouse over it, you will see that each one is showing you that the type at the
+
+top, this is an employee document and the text associated with this chunk.
+
+And you can see that all like 400 chunks are being displayed here.
+
+And if you if you some people say what is the meaning of the x axis and the y axis?
+
+There is no meaning of these axes.
+
+It's just the data as it's distributed there.
+
+What?
+
+What matters is what's close to each other, because that should be information that is similar in meaning.
+
+So that's the thing to to really get your head around and to, to, uh, browse around.
+
+Um, and here's the thing.
+
+The, the text that was sent to our encoder model, remember, it's the encoder that made the vector.
+
+It's been stored in chroma, but the encoder made the vector.
+
+That text was just the text of the chunk.
+
+It's based on the text of the chunk.
+
+It wasn't told that some of these are employees.
+
+Some of these are companies, some of these are contracts and some of these are products.
+
+So it's pretty interesting that some of the data has been separated out quite nicely.
+
+Like you'll see that generally the employees are all together here.
+
+Now there's some company related information no doubt.
+
+If you dig into it you'll see that it's quite employee related, but some of it has ended up around
+
+here.
+
+But most of it is clustered up here.
+
+And then you'll see some of the other stuff around here.
+
+So generally speaking it's separated things out.
+
+There is something which looks like a bit of a stripe of the product data that seems to come in between
+
+some of the different sections of contracts.
+
+So there's some separation by, by meaning based on the type of document.
+
+Uh, and you will hopefully get a good sense by looking around here are the different integration services,
+
+parts of different contracts.
+
+And you can see how they're close to each other in the vector space.
+
+So take a moment.
+
+Take some time to look through this.
+
+Examine the chunks.
+
+See that chunks with a similar meaning are close to each other, and get a sense for what does it mean
+
+to have this information, these vectors stored in chroma, keeping in mind that the vectors are stored
+
+in chroma, but the vectors were made by the hugging face or mini V2 model.
+
+That's what built these vectors that we're looking at right here.

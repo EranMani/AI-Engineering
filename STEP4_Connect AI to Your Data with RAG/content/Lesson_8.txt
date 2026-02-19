@@ -1,0 +1,413 @@
+Well, hopefully you are as happy with this as I am.
+
+I do find these these visualizations really cool.
+
+Make it a bit bigger.
+
+Why not?
+
+And close that that sidecar.
+
+There we go.
+
+Now we really get it in its full glory.
+
+All the different points there.
+
+I hope that you've you've taken a moment to to really dig in to this data visualization, but maybe
+
+there's something a little bit cooler we can do as well.
+
+It's probably not lost on you that we humans, as I mentioned before, are able to go one bit further
+
+than 2D.
+
+We can see things in 3D, and I wouldn't be doing my job if I didn't, uh, bring for you a 3D representation
+
+of this as well.
+
+And t-SNE is able to do that simply by passing in a number of components, three instead of two.
+
+Uh, and we can project our 384 dimensional space down to 3D and see how that would look.
+
+So let's take a look.
+
+Here it is coming right up.
+
+Bam!
+
+There I present to you, uh, our points are 400 chunks shown in 3D space.
+
+And I hear you.
+
+You may, may say, oh, at first blush, this looks a bit of a mess.
+
+Uh, I prefer the 2D version.
+
+Uh, but but wait, uh, you could, first of all, hover over these points to get their descriptions
+
+like this and see where they are in the space.
+
+But also, you can rotate the whole space around like that, check that out and get a real sense for
+
+you.
+
+Really get a better sense for how those blues, whilst they are a little bit in the middle of the red,
+
+they are somewhat in their own cluster.
+
+Um, and the yellows also have their own sort of distribution.
+
+Uh, and you can really hone in by, by zooming in like this.
+
+Check this out, come in and explore the different points.
+
+And so even though these yellows seem like they were a bit closer to the reds, they really don't look
+
+at it.
+
+Now you can see how they're distributed differently.
+
+So even though the 2D is a little bit easier to look at than the 3D, you can explore and And investigate
+
+so much more with the 3D, and I encourage you to have fun with this.
+
+Of course, the sort of the proper use of this is to spot anomalies.
+
+Spot how?
+
+Well, uh, different, different documents are being grouped by similarity.
+
+Dig in and try and find mistakes and gives you clues as to how you could potentially use different encoders.
+
+But it's also great fun, and it gives good intuition for what it means to have these vectors.
+
+And again, you can think of it like we're visualizing these vectors as they are in chroma.
+
+Just always keep in mind that we're visualizing indeed these vectors as they've been stored in chroma.
+
+But the vectors weren't created by chroma.
+
+The vectors were created by the hugging face sentence transformers model or mini lm, l6 v2.
+
+That's what turned our 400 or so chunks into these points in 304 dimensional space.
+
+And now for my next trick.
+
+Uh, I want to to drill down on this idea that it's the The encoder that decides where these points
+
+are in space.
+
+And what better way to illustrate that than to try a different encoder?
+
+So let's go back and let's try the different encoder back.
+
+Back we go here and I'm going to comment out where we set the embedding model.
+
+And here let's start by looking at the text embedding three small model from OpenAI.
+
+Let's check this out.
+
+Let's run this.
+
+And this code you remember is going to delete my database.
+
+Create a new database with 413 documents.
+
+Again the same chunks that are gone in.
+
+Let's run this again.
+
+Remember you can see here we had 384 dimensions before.
+
+From the hugging face model we now have 1536 dimensions.
+
+Because we're using a different embedding model.
+
+We're using a paid one.
+
+But it's very, very cheap from OpenAI.
+
+Text embedding three small.
+
+All.
+
+Okay, let's go back to visualize again.
+
+We'll do the pre-work to get our documents.
+
+And now here we are.
+
+So before I run this cell, let's take another look right here at how it looks before.
+
+This is how it looked before.
+
+We're now going to run this and generate a new visualization of the new vectors, as they are from the
+
+OpenAI small model instead.
+
+Okay.
+
+Are you ready for this?
+
+Keep this in your mind.
+
+Keep keep that picture.
+
+If you've got a photographic memory, hopefully it's there.
+
+Let's run this again and see what it looks like now.
+
+Okay.
+
+It's happened.
+
+There we have it.
+
+Okay.
+
+It looks completely different.
+
+So first off, the fact that it's all rotated around is doesn't mean anything.
+
+Remember the actual x and y coordinates don't have any meaning.
+
+What matters is the how separated the documents are.
+
+And look at how much better OpenAI's model has done.
+
+Look at how the employee documents are all the way over here.
+
+Look at how the, uh, the contracts are here.
+
+And you can see now that the products are in a quite a different place.
+
+Uh, except for some documents over here.
+
+And what you'll find if you look into this is that this specifically, these parts here are specifically
+
+around the features of the products.
+
+And that's going to be very similar to the text around here, which is the parts of the contract which
+
+relate to features.
+
+So you'll find that when you're using a model like like OpenAI, it's really very good.
+
+The OpenAI embeddings model and associating meaning.
+
+And over here you'll see that the company stuff is all here.
+
+In this one strip, you'll see that there's a couple of of employee records here.
+
+And these are going to be chunks of the employee record that seem to relate to information about the
+
+company.
+
+Uh, if you dig into it, I expect you'll find that.
+
+But let's go back up now and let's make one more change and change to the to to the large model and
+
+see how that looks.
+
+So here I am back in the embedding model section we'll go for text embedding three large.
+
+Let's run this.
+
+And we are now hopefully going to be converting our 413 documents into bigger vectors.
+
+Well how much bigger.
+
+Let's have a look.
+
+Before we had 1536 dimensions associated with with each vector, we now have 3072 dimensions, 3072
+
+dimensions in the vector store associated with each of our 413 chunks.
+
+Okay, it's time to visualize.
+
+Remember how it looks.
+
+This is how it looks with the small variants.
+
+Let's have a look with the large variant.
+
+Uh, and here it is.
+
+Okay.
+
+Uh, so again it's another step.
+
+Better see how again, first of all, as before, the employees are over on the left.
+
+Now it doesn't matter.
+
+They are clearly very separate except for these two pieces, which is the stuff that, um, you can
+
+see the word ensure is in both of these.
+
+So these are the the two fragments of an employee document that seem to be most about the company as
+
+a whole.
+
+You can see now that the separation between blue and red is even stronger.
+
+The smarter model has done an even better job of understanding the different semantic meaning between
+
+these chunks.
+
+Um, and over here you'll see that this this is indeed still parts of the product that is about the
+
+functionality which seems to belong most with the contracts.
+
+So you can see that that's why it's done that.
+
+Look here again, it's, it's part of the, of the product.
+
+And this is the parts of the contracts that are about the product, which is why they're all around
+
+the same territory.
+
+So absolutely fascinating.
+
+You can see what a better job the large model has done.
+
+And so we really see how we've, we've we've stepped up between the small hugging face model, then
+
+the small version of OpenAI, which is still pretty big, and then the large version with 3072 dimensions
+
+and and how that's allowed the data to be so separated.
+
+And it's worth pointing out, it can be tempting to think that the reason that the large model is better
+
+is because it has more dimensions.
+
+It is typically the case that like, like, like a larger model will produce vector embeddings with
+
+higher dimensionality that allows it to express things with, with, with more degrees of freedom.
+
+But that's not always the case.
+
+And it doesn't need to be the case.
+
+It matters that it is a more advanced transformer that is a better at capturing the meaning of the text,
+
+and being able to express that in more dimensions, I suppose, gives it more power to do it.
+
+So they are often somewhat related.
+
+But we did move between about 400 dimensions, originally 384 for the hugging face model to about 1000
+
+dimensions, 1005 to about 3000 dimensions.
+
+As we move through those three embedding models, I know, I know exactly what you're waiting for me
+
+to do.
+
+You're waiting for me to make the 3D plot.
+
+I'm thinking of it too.
+
+Let's do this and let's go in.
+
+Remember the old 3D plot?
+
+This is the old one with the hugging face model.
+
+A bit of a mess.
+
+Let's now create a new 3D plot.
+
+I know it's what you're waiting for.
+
+Here it is.
+
+Well, you know, it's still a little bit messy because these 3D plots can be.
+
+But check this out.
+
+Look at what happens if I maneuver us around.
+
+Look at how cleanly separated those four blobs are.
+
+Again, some overlap between contracts and the products.
+
+And that's because there is some overlap in those types of documents.
+
+Contracts contain some product related information in them, as you will see if you dig into these documents.
+
+But generally speaking, this is just amazing to see.
+
+It really gives you this, this, this good sense of what it means to take the meaning of a document,
+
+turn it into a vector in space.
+
+I hope you like it, and I do encourage you to explore this more.
+
+Now keep working through this.
+
+Look at different points where there are points close together.
+
+Satisfy yourself that the content of those chunks is similar, and get a good sense of what it's what
+
+it takes for a model to position some data somewhere in vector space.
+
+And that is a wrap on this great day.
+
+I hope you agree that that my intro was was was true.
+
+It was a lot of fun today.
+
+Those vector visualizations, that's what it's all about.
+
+Uh, I very much encourage you to experiment with different encoders now.
+
+Go, go and try some different embedding models.
+
+You can look them up, you can do different open source ones.
+
+Or you could try and do like the Gemini one if you've got a Gemini account.
+
+Experiment with them and then look at the visualizations.
+
+Playing with with encoder models is terrific fun and getting a good sense, a good intuition for for
+
+how they represent information differently.
+
+Anyways, to recap, at this point you can generate texts and code with frontier models, assistants
+
+and tools, open source models, hugging face transformers.
+
+You can choose the right model for your projects using benchmarks leaderboards.
+
+You can explain how Rag uses vector embeddings and vector data stores to turn text into documents,
+
+into chunks, to turn chunks, into vectors, to put vectors in a data store how vectors is like the
+
+index in to data.
+
+And we've used chroma, the open source database, perhaps your first vector database that you've now
+
+got running on your computer.
+
+Fantastic.
+
+Next time, next time we actually build a Rag pipeline, we use Lang Chain to build a Rag pipeline.
+
+Super easy.
+
+We deliver like a rag based expert question answerer and you'll be able to to and we'll create like
+
+a Gradio based chatbot app that will show not only the answers to questions, but also it'll be able
+
+to show the documents that it used.
+
+That's reference that helped it answer the question.
+
+The relevant context surfaced by our Rag pipeline.
+
+We're going to do all of that tomorrow.
+
+And at this point, you are 55% of your way through to being an LLM engineer.
+
+See you tomorrow.
