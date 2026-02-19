@@ -1,0 +1,281 @@
+Okay.
+
+Well, that was your first look at Lang Chain and your first look at the document Splitters part of
+
+Lang Chain.
+
+We were able to load in a bunch of documents, split them into chunks, chunks that are like fragments
+
+of the document.
+
+And we use the recursive character text splitter that's able to to try first with, with double empty
+
+lines and then single empty lines and then spaces to try and divide things down into a certain number
+
+of characters with a bit of overlap between them.
+
+To try and sensibly divide up our documents into fragments, chunks of text that are likely to map to
+
+questions.
+
+Okay, put all of that to one side.
+
+We're changing topic.
+
+We'll come back.
+
+We're changing topic.
+
+We're going to talk about encoders or embedding models that I introduced yesterday, models which are
+
+good at taking text and turning them into a set of numbers that we can think of like it's a vector.
+
+It's a location in space sometimes known as a vector embedding.
+
+And this is something which which these models are very good at doing.
+
+And we, uh, we I do want to distinguish very carefully, and this is going to be a bit of a recurring
+
+theme today between these two different steps.
+
+Turning text into a vector that uses an encoder, and then storing that vector in a vector database
+
+such as chroma, which is one we'll be using.
+
+A vector database is a particular type of database that's very quick at doing queries, not SQL queries.
+
+In a way you may be familiar, but queries about which piece of data has a vector closest to this one,
+
+so they are quick at vector based retrieval.
+
+That's their point, but they don't themselves come up with the vectors.
+
+The vector isn't created by chroma.
+
+The vector is created by an encoder model, an LLM.
+
+That's what creates the vector.
+
+So there are these two different things to think about the encoder model and the vector database.
+
+And they are separate.
+
+When we look at the code it's somewhat conflates these two because you create them at the same time
+
+and associate them together.
+
+So it can get confusing to keep in mind that the vector database is where they get stored, but it's
+
+not where they're created.
+
+They're created by an encoder model.
+
+So just to rattle off a few encoder models, there's this word to vec, which is where it all began,
+
+a model which can take a word and turn it into a vector.
+
+It's not used for this purpose, but for historical reasons.
+
+This is the thing I mentioned with the king minus man plus woman is queen.
+
+Then Bert came out in 2018.
+
+This was Google's transformer model.
+
+That was an encoder that was so powerful and is still somewhat used today.
+
+But modern encoders, there are many of them.
+
+These are the ones you might come across most often.
+
+OpenAI has a bunch of encoders.
+
+They've got one called Text embedding, three small, uh, and they've got a companion called Text embedding
+
+three large.
+
+And we will use both of these at some point, I imagine.
+
+Uh, Google has one called Gemini Embedding 001, which is there.
+
+They're embedding model that's very popular.
+
+And then Hugging Face has a ton of open source encoders in a package called hugging Face sentence Transformers.
+
+And the one that is, I think, most popular, certainly the one that we all use and the one that I'm
+
+sure you'll come across many, many times is called the All mini lm, l6 v2.
+
+Very popular indeed.
+
+So these are some of the most common encoders you're likely to come across.
+
+Okay.
+
+We are now going to use long chain to take what we've just built and put it in a vector data store.
+
+So we already read in the documents across all of the folders.
+
+We already divided them into these chunks.
+
+We turned documents into little, little bits.
+
+From it broken down.
+
+We use the recursive character text splitter again uh, which which looks for double enters and then
+
+and then single character turns and then spaces.
+
+We've got these chunks that are all about 1000 characters long with 200 character overlaps.
+
+Hopefully you've gone in, you've dug in, you've looked at them, you've examined the chunks.
+
+You've satisfied yourself that they do make up these documents.
+
+Now the final step is to turn them into vectors and store them in a database.
+
+And again I say the final step, but you really do need to remember it's two different things.
+
+An encoder or an embedding model that's turning the text into a vector.
+
+And then a vector store the database where they are stored, which is able to quickly look up things
+
+that are close to each other in the vector data store.
+
+And so to to again recap the popular encoders I mentioned OpenAI's ones Gemini has one.
+
+The hugging face all.
+
+Many Ml6 v2 very popular.
+
+And then there are popular vector data stores or vector stores.
+
+So there's a lot of these.
+
+And I often get the question which vector data store should I use.
+
+Which one is best.
+
+And again it comes back.
+
+I think people often get confused between the encoder and the vector store.
+
+You really need to worry a lot about which encoder or which embedding model is best for your problem.
+
+Different embedding models will perform very differently in different use cases, and that needs a lot
+
+of experimenting and testing, as we'll be doing this week.
+
+The choice of vector store database.
+
+This is more like any other database choice.
+
+This is more an infrastructure choice about trading off cost and performance.
+
+There are open source entrants that chroma will use today.
+
+So easy to use and of course free open source.
+
+You just put it.
+
+There is another one that's pretty popular.
+
+Um, Fyss is very popular.
+
+It's Facebook's.
+
+It stands for Facebook AI similarity search from meta before the name change, I guess.
+
+And Fyss sounds better than mice.
+
+Uh uh, so uh, so Fyss is also it's very popular, but it is not really a database.
+
+It's just an in-memory, uh, version that is able to just take vectors and do in-memory vector search.
+
+So these are some of the most popular open source ones.
+
+There are paid offerings that are paid products like Pinecone and Alleviate, and there are a lot you
+
+can, you can, you can Google it or ask ChatGPT to to tell you some of the best.
+
+There are lots of them.
+
+Um, pinecone.
+
+They're both very, very popular.
+
+And these are paid offerings.
+
+And so you pay to be able to to scale to so they are managed database offerings.
+
+Um, and very, very much more powerful.
+
+So if you're looking for, for an enterprise vector data store, you might consider this.
+
+But I have to say it's less common in recent years.
+
+Uh, a recent year, I should say this is all very new, uh, because nowadays the mainstream database
+
+providers all support vectors natively, and so there's less of a need to sort of adopt a pure vector
+
+database like a pinecone, because the mainstream databases like Postgres, you can put vectors in Postgres
+
+as a relational database.
+
+Uh, Mongo a NoSQL database, you can a document based database.
+
+You can put vectors there to uh, at at Nebula.
+
+In my day job we use Elasticsearch, the high performance search platform.
+
+And that takes vectors natively.
+
+And so we have like 200 million vectors.
+
+And we're able to do a search that filters and finds similar vectors.
+
+And it does it just in a couple of seconds.
+
+It's blazingly fast.
+
+Um, and so it's just like like a native search engine which also natively supports vector similarity.
+
+And so the point I want to drive home here, a lot of people do ask me about vector data store choice.
+
+And I just want to say that that most of the time what matters is the encoder, the embedding model.
+
+That's what you really need to care about.
+
+That's what you need to test, as we will this week and really understand what are the which embedding
+
+model is going to work best for your business problem and surface the most relevant content, the data
+
+store it goes into.
+
+This is more of a concern of a typical Infrastructure data base decision.
+
+It's more about your cost, your performance, your ability to scale, your resiliency, the backups,
+
+the security, all those kinds of concerns as you would for any database.
+
+And so it's more of that kind of infrastructure choice that could work with whichever encoder you pick.
+
+Now there are some exceptions to that.
+
+The pros are probably waiting to jump in and, and correct me with some situations in which some of
+
+the high end, uh, platforms that can support different kinds of similarity search, uh, special performance
+
+optimized searches when they, when they only look in certain regions of space, that kind of thing.
+
+So it's certainly true.
+
+There is some overlap, but it's relatively light most of the time.
+
+What you should be spending your, your, your, um, energy focused on as a, as a, as an AI engineer
+
+is the embedding model.
+
+How are you creating vectors from text and the database decision?
+
+It's more of a kind of infrastructure call a trade off between cost and performance.
