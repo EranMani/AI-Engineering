@@ -1,0 +1,335 @@
+And here we are back in cursor.
+
+We're going to week five.
+
+We're going to day three.
+
+Welcome to day three.
+
+We're building our expert question answerer for ensure Elm.
+
+It's going to be a long chain one zero implementation of a Rag pipeline using the vector store we created
+
+last time.
+
+Now, you may remember last time when we made our vector store, we first used a encoder from Huggingface,
+
+the all mini Ml6 v2.
+
+Then we went back and did it again with a couple of OpenAI models that were a lot better.
+
+Well, I've actually just gone back and rerun it with the original model because I don't know which
+
+one you will have ended up using.
+
+And just in case you stuck with the original, the weaker one, that's what.
+
+That's what I've run it with right now.
+
+You can choose.
+
+You can go back and do that if you wish, or stick with what you've got up to you.
+
+All right.
+
+Let's start with some imports.
+
+So there's a bunch of of long chain imports here.
+
+And these are interesting ones.
+
+So this first one from Lang chain OpenAI import chat OpenAI.
+
+Now that that is the the LM abstraction I mentioned.
+
+Chat.
+
+OpenAI is one of the llms that you can create.
+
+It will respond to invoke from Cromer import Cromer.
+
+We had that abstraction last time.
+
+Uh, this is something to do with some, some, some messages that we're going to play with.
+
+And these are the embeddings models that we already looked at.
+
+I'll just mention that.
+
+So I'll run these imports.
+
+There they go.
+
+Um, so, uh, it takes a few seconds.
+
+There's a lot to import.
+
+Uh, so, so to show you here, we've got OpenAI import chat.
+
+OpenAI.
+
+You could also have here from Lang Chain.
+
+Uh, llama imports llama I spelt Lang chain wrong, but it is still filled it in.
+
+Uh, and I could say from lang chain underscore anthropic import chat anthropic.
+
+Uh, if you do this you could simply replace chat OpenAI with Chat llama or Chat Anthropic and it will
+
+just work that that is really the promise of long chain that these abstractions are very swappable.
+
+They all respond to invoke, and that allows you to to manipulate things quite easily, similar to the
+
+way abstractions like light LM do it, but with with long chain it is a bit more heavyweight.
+
+It's a completely different package that you have to to install and import.
+
+Okay.
+
+So I'll take that out.
+
+Uh, hopefully you get that.
+
+And now we're going to set some constants and then we're going to get going with our rag okay.
+
+Now first up we are going to create the embeddings object, the all mini lm l6 v2 object.
+
+And we're also going to connect to Cromer with embeddings object.
+
+You can see as I say I'm using this hugging face open source one.
+
+So if you're still using the OpenAI embeddings you need to make sure to use the OpenAI embeddings object
+
+here, import it and then use it here.
+
+Uh, or else if you want to use this one, you do.
+
+You may have to go back and recreate your database.
+
+It's just important that you use the same consistent one, because if you've got vectors in your database
+
+that are the OpenAI 3000 dimension vectors, and now we use this one here, this will be used when we
+
+come up with a query.
+
+We take our question.
+
+We turn it into a vector.
+
+Well if they're different models then trouble will ensue.
+
+You're going to create like this 300 dimensional vector from hugging face.
+
+And you're going to be trying to compare it to 3000 dimension vectors, completely different vectors.
+
+You remember how different they looked in the image as well.
+
+Completely different in your in your vector data store.
+
+And there's going to be an error.
+
+There's going to be a nasty ugly stack trace about mismatch in dimensions.
+
+And you're going to come back to me and say, Ed, what's going on?
+
+And I'm going to say you've got different vector models, so don't do that.
+
+Uh, make sure that they're consistent.
+
+So let's run this.
+
+And now we are going to have created our embeddings.
+
+And we have loaded our data store in the same directory.
+
+This directory is vector db.
+
+You can see it right there.
+
+We've loaded that in.
+
+And we've also told it about the embeddings model that we are using.
+
+Okay.
+
+It's time now for us to create the two big long chain objects the LM and the retriever.
+
+There they both are.
+
+Let's create them.
+
+So you can see that I create the retriever object by doing vector store, the chroma vector store dot
+
+as retriever.
+
+And that just packages it up into a retriever object, an object that we can just call dot invoke on.
+
+And it will do a rag lookup.
+
+So easy and with with chat with with with chat open AI.
+
+All we have to do is just create it like this.
+
+We pass in the model name and I'm also passing in something called temperature and that is making the
+
+LM.
+
+So what is this temperature?
+
+I think it's come up from time to time and I'm not sure I've ever properly explained it.
+
+So so let me just take one minute on temperature right now.
+
+So temperature is it's probably something you've heard about a fair bit, because all of the LMS take
+
+temperature as an input, and it's something that controls how how much variety there is in the output
+
+that comes from the model.
+
+It's a parameter that controls how different it will be each time you call it.
+
+A temperature of zero means that it should be predictable, deterministic, and a higher temperature
+
+means there should be more variety, more more flavor, more differences in the answers.
+
+Each time you call it.
+
+Now some people describe this as as creativity, a higher temperature for more creative output.
+
+I don't think that's quite right.
+
+It's not wrong, but I think it's a bit misleading.
+
+So I'd rather clarify just just so that it's clear for you.
+
+So what's it actually doing?
+
+Well, it's actually controlling at inference time when you're generating each token by token, it's
+
+to do with how you pick which token comes next.
+
+A model, an LM doesn't actually spit out the next token as I think you know, what it actually spits
+
+out is the probability of all the possible next tokens.
+
+Every possible next word gets some probability, even if it's a very small probability.
+
+But everything gets something.
+
+Uh, and typically when I've loosely said, we pick the next token when I'm what I'm sort of referring
+
+to is you could just always just pick the token that got the highest probability, the one that the
+
+model said is the most likely next token.
+
+And with a temperature of zero, all you ever do is pick whichever token got the highest probability,
+
+and you pick that one and that one every single time.
+
+And that is called a temperature of zero.
+
+The most predictable and sort of reliable and deterministic output.
+
+And a higher temperature means that you occasionally pick tokens which, which didn't get the top probability,
+
+but maybe got the second top or something like that.
+
+And in fact, in the case of OpenAI, the temperature varies from 0 to 2, and a temperature of one
+
+means that if a token were given a 10% probability, then you would pick that 110% of the time you actually
+
+sample what token comes next based on the probabilities that they got.
+
+So if a token got 1% probability, it was really unlikely.
+
+Still 1 in 100 times.
+
+You might pick that one if temperature is one.
+
+So there's more more variety in what comes out.
+
+And and indeed that that might mean that it's more creative, but not necessarily.
+
+It really just means that the word choices will be different, and sometimes perhaps a bit odd if the
+
+temperature is high enough.
+
+In fact, with the temperature coming up to two, you can get quite strange answers.
+
+So that's that's what temperature means and what it controls.
+
+And to add two notes to this.
+
+One of them is that, uh, I've used words like deterministic and reproducible.
+
+That's also not quite right, because even with a temperature of zero, the output won't necessarily
+
+be reproducible.
+
+Because there is there is, there is random.
+
+There are random numbers involved in running llms.
+
+You can do something called setting a random seed, which means that the random numbers will be the
+
+same each time.
+
+And indeed we will do that in weeks 6 to 8.
+
+And that can be particularly important when you're testing and trying to make sure that you really do
+
+get the same answer each time.
+
+So so we will be setting random seeds later and you will see that.
+
+And even when you set a random seed, it's still not guaranteed to be the same every time.
+
+Because there are changes at the frontier model in the labs, they change their models.
+
+And also because there are performance optimizations that mean that lots of calculations happen in parallel
+
+in a way that can't always be guaranteed, that the same things will come out exactly the same way.
+
+And so as a result, nothing is ever fully guaranteed to be reproducible.
+
+But if you have a temperature of zero and you do this thing called setting a random seed, then you're
+
+pretty likely to get the same answer every time.
+
+And we will be doing that later in the course.
+
+But for now, we're setting temperature of zero, which is quite common with Rag systems, because you
+
+do want to have a sort of stronger guarantee around reliability, but it's also typical to see temperatures
+
+around 0.5 0.7 as well.
+
+And I mentioned that that temperature isn't really the same as creativity.
+
+If you're looking for your model to be more creative and have higher creativity, the right way to do
+
+that is through the system prompt.
+
+The right way to do that is to instruct the model to be creative.
+
+Give it examples of what it means to you to be creative.
+
+That's what creativity should be all about.
+
+And if you want it to give different answers, the best way to do that is to tell it the prior answers
+
+it gave and say, I now want something different.
+
+That's the most reliable way to do it.
+
+You can use temperature for that kind of thing, but it's just not as reliable in my experience.
+
+Better to focus on prompting if you want to have a particular behavior from your model.
+
+Okay, this was a sidebar, but I think it was a very important sidebar, so I'm pleased we did it.
+
+Let's press on.
+
+Now with the big step of creating our two abstractions, the retriever and the LM, I ran it, it's
+
+done.

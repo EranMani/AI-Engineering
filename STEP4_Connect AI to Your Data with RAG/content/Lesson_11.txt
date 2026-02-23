@@ -1,0 +1,423 @@
+Okay.
+
+So we created our retriever object and our LLM object.
+
+And I promised you that you could just call invoke on either of these objects.
+
+And you may think, well, let me see that.
+
+I'm not sure I believe you.
+
+Well then we'll go and do it.
+
+So here we go.
+
+Retriever Dot invoke.
+
+Who is aviary.
+
+So what will a retriever do if we say to it who is aviary?
+
+What do you think?
+
+What?
+
+What?
+
+What should it do?
+
+That's right.
+
+Exactly.
+
+It should retrieve relevant context.
+
+Something relevant to who is aviary.
+
+So let's run it and bam!
+
+What comes back is for document objects.
+
+They each have an ID, they have metadata, and they have a source.
+
+And you can see that the first one has been pulled from the the document and they have page content.
+
+These are in fact long document objects that we met yesterday.
+
+And they are the chunks that represents the four different chunks that have been found closest to that
+
+question.
+
+Who is Avery?
+
+So what actually happened when we called in Vogue?
+
+It took that fragment.
+
+Who is Avery?
+
+It then used the the retrievers encoder that we had set up here.
+
+So the embedding function, which is Omni v2 to turn it into a vector, it then called chroma to find
+
+the closest vectors.
+
+And that is what it is now.
+
+Then located those documents and it's printing them there.
+
+Very cool, very easy.
+
+All right.
+
+And now we're going to call.
+
+Who is Avery.
+
+So what's that going to do then.
+
+Have a think about that.
+
+What do you think it's going to print.
+
+All right.
+
+You've had your thought and maybe it's not what you expected.
+
+It depends, uh, how much you've been, uh, seeing everything that's going on here.
+
+So it doesn't tell us about Avery Lancaster.
+
+Have you thought that was going to be the moment?
+
+Uh, but no, because, look, we this is this LM is just chat OpenAI based on a model.
+
+We haven't told anything about our retriever.
+
+The al-alam abstraction is just an abstraction around OpenAI, or around a llama, or around an anthropic
+
+or any one of many, many, many different models that you could you could use with long chain Gemini,
+
+whatever.
+
+Um, and so what we have got back is just a generic answer to calling like OpenAI create with who is
+
+aviary?
+
+We get back.
+
+Aviary is a given name that can be used for both males and females.
+
+It may also refer to blah blah blah blah blah blah.
+
+So in other words, that was, uh, definitely no rag happening there.
+
+So we've got our two objects, two long chain objects, either of which can be invoked.
+
+So what's left to be done?
+
+Well, basically we have to put them together.
+
+We need to use both of these in something which is known as rag.
+
+Let's do this okay.
+
+You ready.
+
+We're going to start with just a constant variable called system prompt template.
+
+It's going to describe our system prompt.
+
+Some of this used to be packaged for you in the previous version of chain.
+
+And now I think the idiomatic way to do it lang chain one is to write it yourself, which I much prefer.
+
+I much prefer it when these things aren't hidden from us, so I'm quite happy with the fact that we
+
+get to write our own prompt here.
+
+So the system prompt template is you are a knowledgeable, friendly assistant representing the company
+
+in your realm.
+
+You're chatting with the user about ensure realm.
+
+If relevant, use the given context to answer any question.
+
+If you don't know the answer, say so and context.
+
+And then there is a little, little placeholder that we'll replace with the word con with with with
+
+the context that we find from our retriever.
+
+Okay.
+
+That's it.
+
+That's a constant.
+
+And this, this function here, this I present to you rag.
+
+Rag in what is that that five lines of code.
+
+That's all there is.
+
+Okay.
+
+So I'm saying this this is a function called answer question.
+
+It's given a question.
+
+It's also given this variable called history that we're going to ignore.
+
+You may think why is that?
+
+But you probably have guessed why already.
+
+But anyway, so we are going to first take our retriever object.
+
+This is one of the two big long chain abstractions we're working with and we call invoke on that question.
+
+And we already know what we get back.
+
+We get back some documents that are that are relevant, okay.
+
+And we will just smash them together, taking the page content and, and wallop them together with empty
+
+lines between them.
+
+So it's just the chunks laid out there in this variable context.
+
+Okay.
+
+So far so good.
+
+Very easy.
+
+Next up look we'll take this system prompt template that I've got just up here.
+
+And we will we will just change that.
+
+We will substitute in the context as the context that we've just created right here.
+
+It's just basically taking the result of this and squashing it in here in sort of fancy Python.
+
+That's what this line here does.
+
+We've now got a system prompt that is going to be all of this with the retrieved documents in there.
+
+And now we do LM invoke and we pass this in as the system message.
+
+And we pass in this question as what Lang chain calls the human message, which we just known as, as,
+
+as user.
+
+We're used to it being being user.
+
+But Lang Chain has this idea of a system message and a human message.
+
+Uh, instead of a list of Dix, it's a list of these objects, these Lang chain objects, and we return
+
+response content.
+
+That is the result, uh, that is lang chains idiomatic, uh, way of plucking out the result from this
+
+response.
+
+And that is all there is to it.
+
+We're basically calling invoke on the retriever and invoke on the LM.
+
+And we're kind of stitching them together.
+
+And I'm running that now.
+
+Okay.
+
+Are you ready to try this out?
+
+I was born ready.
+
+You're thinking.
+
+Yes.
+
+Okay, so we're going to call it answer question with who is Avery?
+
+And we're hoping for a slightly better response than this, uh, this given name thing up here.
+
+Let's have a look at what we get.
+
+Who is Avery?
+
+Avery Lancaster is the co-founder and chief executive officer of insurer Elm.
+
+She's been with the company since its founding and has played a key role.
+
+Blah blah blah, blah, blah.
+
+Yes it works.
+
+We have just done Rag.
+
+We've just done retrieval, augmented generation, five lines of code.
+
+That is the magic of of long chains, abstractions making it so easy for us.
+
+Uh, and, uh, yeah, I hope that you're thinking, wait, what is is it that easy?
+
+It really is that easy.
+
+The long chain parts of this is the nice little packaging around doing an invoke and an invoke this
+
+system message, human message is is very much lancioni kind of stuff, but you can probably appreciate
+
+that it wouldn't have been much more just to do this yourself.
+
+Just to build the system prompt template, do the query in chroma and then do a.
+
+Create pass in the system prompt and the user message.
+
+We could have done that too.
+
+It would have been maybe ten lines of code instead of five.
+
+Lang made it even more elegant and simple and quick.
+
+But rag is just not that difficult, and I'm sure it's no surprise to you.
+
+But I can also change this to who is Lancaster, and presumably it will be able to to handle.
+
+Lancaster refers to Avery Lancaster quite easily.
+
+So unlike the nasty hack we did two days ago just searching for the word Lancaster, it can handle the
+
+first name, it can handle the last name.
+
+And I imagine if we do, who is Avery Lancaster?
+
+But we now spell her name wrong like this.
+
+I imagine it's going to be able to handle that.
+
+It seems there might be a typo in the name based on the information I have.
+
+You might be referring to Avery Lancaster.
+
+Isn't that amazing?
+
+Isn't that incredible?
+
+That is fuzzy matching at work.
+
+That is because it found the vector for Avery.
+
+Lancaster was close to the vector for Avery, spelt wrong Lancaster.
+
+Even though the words were different.
+
+And you can you can go to town experimenting with this and get a sense of what works and what doesn't,
+
+how far you can take it with.
+
+Of course, we're relying on the fact that the all mini LM, L6, v2 is pretty good at this kind of
+
+thing, but if you're using the OpenAI embeddings model, it'll be even better.
+
+And I know what you're waiting for.
+
+You, you you knew why I put that history in there, at least.
+
+Maybe you did.
+
+Uh, it's because, of course, what?
+
+We can come next.
+
+Is that anything you're familiar with?
+
+The fact that, uh, that that with with Gradio, we have a chat function that takes the message and
+
+the history.
+
+Well, there's nothing magic about the word chat.
+
+It doesn't need it to be called chat.
+
+It can be called anything as long as it takes a question and the history.
+
+So we can just simply create a chat interface and pass in answer question as the callback function,
+
+it should call with the question and the history.
+
+Uh, and uh, yeah, just, just, um, I know you get this, but look, let me just do this.
+
+Let me do return bananas in here.
+
+If I if this has returned bananas, then if I launch a user interface here and I say hi there, it will
+
+say bananas.
+
+Who are who is Avery bananas?
+
+Uh, I'm sure you get this, but some of you might have skipped week two, and so you might not be not,
+
+not be used to.
+
+Uh gradio.
+
+So just in case that's just a show.
+
+That's all that's going on here.
+
+I take that out.
+
+Now, this is the function that Gradio will call run that instead bring up a fresh interface.
+
+We are now going to say who is Avery?
+
+And if it says bananas, I'll be very surprised.
+
+Uh, and, uh, we'll see what happens.
+
+Avery Lancaster is the co-founder chief executive officer of ensure.
+
+L'm there.
+
+You have it.
+
+What is market?
+
+L'm.
+
+Uh, that's one of the products, I believe.
+
+Oh, did I spell it wrong?
+
+Uh, there we go.
+
+I spelt it wrong.
+
+Market l'm ensures innovative insurance marketplace.
+
+So?
+
+So it's a great example.
+
+Uh, which, of course, was intentional, uh, of how the vector data store is able to handle typos
+
+and look up the proper product name, even if I get the product name wrong.
+
+Uh, beautiful.
+
+We've seen rag at work through a graphical user interface.
+
+We've seen it being able to take a question, turn it into a vector, look it up in chroma, find associated
+
+relevant context, put that in the system prompt, send that off to an LLM and get back an answer which
+
+shows expertise in the area.
+
+That is Rag in a nutshell, and not only in a nutshell, but also rag in five lines of code.
+
+Courtesy of Long-chain.

@@ -1,18 +1,254 @@
 # Production-Grade RAG & LangChain: Engineer’s Guide
 
-**For:** Eran, Junior AI Engineer  
+**For:** Eran, Junior AI Engineer (and anyone building a first RAG app from zero)  
 **From:** Todd, Senior AI Engineer & Team Lead  
 **Purpose:** Turn you into a confident builder of RAG applications with LangChain  
 **Assumptions:** No prior RAG, vector, or embedding knowledge  
 
 ---
 
+## What You’ll Build (The Big Picture)
+
+By the end of this guide you will have built an application that:
+
+1. **Takes your own documents** (PDFs, text files, etc.).
+2. **Chunks and embeds them** into a vector store (e.g. Chroma).
+3. **Answers user questions** by retrieving relevant chunks and asking an LLM to answer using only that context.
+4. **Shows where each answer came from** (source citations) so users and you can verify and debug.
+
+You’ll understand *why* each step exists and *when* to choose one option over another—so you can ship and maintain a real RAG system, not just copy-paste a tutorial.
+
+---
+
+## Table of Contents
+
+| Section | Purpose |
+|--------|--------|
+| [How to Use This Guide](#how-to-use-this-guide) | How to read and use the doc. |
+| [Prerequisites](#prerequisites-before-you-start) | What you need before starting. |
+| [Learning Path](#learning-path-where-you-are) | Map of phases and pipeline diagram. |
+| [Build Order](#build-order-what-to-do-when) | Step-by-step what to build and when. |
+| [Quick Start](#quick-start-your-first-rag-in-one-script) | One script to run RAG end-to-end. |
+| [Scope](#scope-what-this-guide-covers-and-what-it-doesnt) | What’s in and out of scope. |
+| [Troubleshooting](#troubleshooting-common-beginner-issues) | Fix common errors and confusion. |
+| [Glossary](#glossary-quick-reference) | Term definitions. |
+| **Part 1** | [Core Concepts — Vectors & Embeddings](#part-1-core-concepts--vectors--embeddings) |
+| **Part 2** | [RAG Architecture](#part-2-rag-architecture--the-two-model-pipeline) |
+| **Part 3** | [LangChain Ecosystem](#part-3-the-framework--langchain-ecosystem) |
+| **Part 4** | [Chunking & Ingestion](#part-4-data-preparation--chunking--ingestion) |
+| **Part 5** | [Encoders & Vector Stores](#part-5-infrastructure--encoders--vector-stores) |
+| **Part 6** | [Visualization & Debugging](#part-6-visualization--debugging) |
+| **Part 7** | [Production Operations](#part-7-production-operations--safety) |
+| **Part 8** | [Engineering Decision Matrix](#part-8-engineering-decision-matrix) |
+| **Lessons 9–13** | [Implementation Track](#implementation-track-lessons-913-query-pipeline-to-production) (query, temperature, stitching, modularization, failure modes) |
+| **Part 9–11** | [Testing](#part-9-testing--quality), [Structure](#part-10-project-structure--boundaries), [Anti-Patterns](#part-11-anti-patterns-what-not-to-do) |
+| [Summary](#summary-for-eran) | What you’ve learned and next steps. |
+
+---
+
 ## How to Use This Guide
 
-- Read section by section. Each builds on the previous.
-- Answer the **Check Your Understanding** questions before moving on.
-- **Engineering decisions** are called out so you know *why* we choose one option over another.
-- Code and config examples are production-oriented, not throwaway scripts.
+- **Read in order.** Parts 1–8 build the mental model and decisions; the Implementation Track (Lessons 9–13) turns that into a working pipeline. Skipping ahead will leave gaps.
+- **Do the checkpoints.** Answer the **Check Your Understanding** questions before moving on. They’re there so you catch misunderstandings early.
+- **Use the roadmaps.** The **Learning path** and **Build order** tell you what to do when. The **Milestone** tables show what you’ll have after each phase.
+- **Run code early.** The **Quick start** gets you to a minimal “ask a question, get an answer” in one script. Then you can revisit the theory with something concrete in mind.
+- **Engineering decisions** are called out so you know *why* we choose one option over another. Code examples are production-oriented, not throwaway scripts.
+
+---
+
+## Prerequisites (Before You Start)
+
+| Requirement | What you need | Why |
+|-------------|----------------|-----|
+| **Python** | 3.10+ recommended | LangChain and common vector stores target modern Python. |
+| **Environment** | Virtual env (e.g. `python -m venv .venv`) | Keeps dependencies isolated from other projects. |
+| **API keys** | OpenAI API key (or another provider for embeddings + LLM) | Embedding and generation calls go to an API. Get keys from [OpenAI](https://platform.openai.com/api-keys) (or your provider); never commit them—use env vars (e.g. `OPENAI_API_KEY`). |
+| **A few documents** | 1–3 PDFs or text files to “ask questions about” | You need something to chunk and embed. Start small (e.g. a single FAQ or short manual). |
+
+**Optional but helpful:** Basic Python (functions, lists, dicts) and a vague idea of what an “API” is. No ML or math required—we explain vectors and similarity as we go.
+
+---
+
+## Learning Path (Where You Are)
+
+Use this to see how the pieces fit and what you’ll have at each stage.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  PHASE          │  PARTS / LESSONS   │  YOU WILL HAVE…                      │
+├─────────────────┼────────────────────┼──────────────────────────────────────┤
+│  Theory         │  Part 1–2           │  Clear idea: RAG = retrieve by        │
+│                 │                    │  meaning, then generate. Two models.   │
+├─────────────────┼────────────────────┼──────────────────────────────────────┤
+│  Framework &    │  Part 3–4           │  LangChain in mind; know how to       │
+│  Data           │                    │  chunk and attach metadata.            │
+├─────────────────┼────────────────────┼──────────────────────────────────────┤
+│  Infrastructure │  Part 5–6           │  Encoder vs store choices; when to    │
+│  & Debugging    │                    │  re-index; how to sanity-check data.  │
+├─────────────────┼────────────────────┼──────────────────────────────────────┤
+│  Operations &   │  Part 7–8           │  Dev vs prod ingestion; config;      │
+│  Decisions      │                    │  decision matrix for “which store?”   │
+├─────────────────┼────────────────────┼──────────────────────────────────────┤
+│  Query &        │  Lessons 9–11       │  Retriever + LLM + prompt; working   │
+│  Pipeline       │                    │  “ask a question → get an answer” flow.│
+├─────────────────┼────────────────────┼──────────────────────────────────────┤
+│  Production &   │  Lessons 12–13     │  Modular ingest/answer; history;       │
+│  Failure Modes  │                    │  failure modes and evaluation.       │
+└─────────────────┴────────────────────┴──────────────────────────────────────┘
+```
+
+**RAG pipeline at a glance (same flow you’ll implement):**
+
+```
+  User question
+        │
+        ▼
+  ┌─────────────┐     query vector      ┌──────────────┐
+  │  Embedding  │ ──────────────────►  │  Vector      │
+  │  model      │                      │  store       │
+  └─────────────┘                      │  (e.g. Chroma)│
+        ▲                               └──────┬───────┘
+        │                                      │
+  "What are ticket                             │ returns
+   prices to Heathrow?"                        │ text chunks
+        │                                      ▼
+        │                               ┌─────────────┐
+        │                               │  Prompt:    │
+        └───────────────────────────────│  context +  │
+                                       │  question   │
+                                       └──────┬──────┘
+                                              │
+                                              ▼
+                                       ┌─────────────┐
+                                       │  LLM        │
+                                       │  (e.g. GPT) │
+                                       └──────┬──────┘
+                                              │
+                                              ▼
+                                       Answer + sources
+```
+
+---
+
+## Build Order (What to Do When)
+
+Follow this sequence so each step has a clear goal and you don’t block yourself.
+
+| Step | What to do | By the end you’ll have… |
+|------|------------|--------------------------|
+| **1. Setup** | Create a project folder, venv, install `langchain-openai`, `langchain-chroma`, `langchain-text-splitters`. Set `OPENAI_API_KEY`. | Environment ready to run RAG code. |
+| **2. Quick start** | Run the minimal script below (or your own one-file version): load 1 doc → chunk → embed → store → ask one question. | A single question answered from your doc; end-to-end loop working. |
+| **3. Ingest properly** | Use Parts 4–5: recursive chunking, metadata, same embedding model you’ll use at query time. Persist to Chroma (or your chosen store). | A populated vector store you can query. |
+| **4. Query from code** | Use Lesson 9–10: retriever with `similarity_score_threshold`, same embedding model, LLM with low temperature. Log retrieved docs. | A function that takes a question and returns answer + sources. |
+| **5. Add a simple UI** | Wrap your query function in Gradio (or a minimal web endpoint) and **show source documents** next to the answer. | Something you can demo and debug visually. |
+| **6. Harden** | Use Part 7 and Lessons 12–13: config/env, error handling, ingest vs answer separation, evaluation and failure-mode checklist. | A structure you can deploy and improve over time. |
+
+---
+
+## Quick Start (Your First RAG in One Script)
+
+**Goal:** Run one script that loads a small piece of text, chunks it, embeds it, stores it in Chroma, and answers one question. No prior RAG knowledge required—this is to “see the loop” before diving into theory.
+
+**When to do it:** Right after **Prerequisites**. You can do it before Part 1, or after Part 2. If you prefer theory first, skip to Part 1 and come back here when you want to run something.
+
+**Setup (one-time):**
+
+```bash
+mkdir my-first-rag && cd my-first-rag
+python -m venv .venv
+# Windows: .venv\Scripts\activate   # macOS/Linux: source .venv/bin/activate
+pip install langchain-openai langchain-chroma langchain-text-splitters python-dotenv
+```
+
+Create a `.env` file (and add `.env` to `.gitignore`):
+
+```
+OPENAI_API_KEY=sk-your-key-here
+```
+
+**Minimal script (`quick_rag.py`):**
+
+```python
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv()
+
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.documents import Document
+from langchain_chroma import Chroma
+
+# 1. Tiny "corpus" — in a real app you'd load PDFs or files
+text = """
+Our company refund policy: Refunds are allowed within 30 days of purchase.
+Contact support@company.com with your order ID. No refunds after 30 days.
+"""
+docs = [Document(page_content=text.strip(), metadata={"source": "policy.txt"})]
+
+# 2. Chunk (we use the same splitter we'll use in production)
+splitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=20)
+chunks = splitter.split_documents(docs)
+
+# 3. Embed and store — use one embedding model and stick to it
+embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+persist_dir = "./chroma_quickstart"
+vectorstore = Chroma.from_documents(
+    documents=chunks,
+    embedding=embeddings,
+    persist_directory=persist_dir,
+)
+
+# 4. Retriever + LLM (same embedding model as above; low temperature for RAG)
+retriever = vectorstore.as_retriever(search_type="similarity_score_threshold", search_kwargs={"k": 2, "score_threshold": 0.5})
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+
+# 5. Ask a question
+question = "How do I get a refund?"
+retrieved = retriever.invoke(question)
+context = "\n\n".join([d.page_content for d in retrieved])
+prompt = f"Answer only using this context. If the answer is not here, say so.\n\nContext:\n{context}\n\nQuestion: {question}"
+answer = llm.invoke(prompt)
+
+print("Question:", question)
+print("Answer:", answer.content)
+print("Sources:", [d.page_content[:80] + "..." for d in retrieved])
+```
+
+**Run:** `python quick_rag.py`
+
+**What to notice:** The retriever returns *chunks* (text), and that text is passed into the LLM’s prompt. The LLM never sees vectors—only the retrieved text. If you change the question to something unrelated, you may get “I don’t have that in the context”—that’s correct behavior. Once this runs, continue with Part 1 for the concepts and then build out ingestion and UI following the Build order.
+
+---
+
+## Scope: What This Guide Covers (and What It Doesn’t)
+
+| In scope | Not in scope (mentioned for context only) |
+|----------|-------------------------------------------|
+| End-to-end RAG: ingest → store → query → answer with citations | **Agents** (tool use, multi-step planning) — different architecture |
+| LangChain 1.0 patterns: Retriever, ChatModel, chunking, Chroma | **Streaming** token-by-token — we focus on request/response |
+| Embedding consistency, temperature, similarity threshold | **Multi-tenancy** or per-user isolation — same concepts, more infra |
+| Production concerns: config, errors, logging, modularization | **Advanced RAG** (HyDE, re-ranking, query rewriting) — we introduce ideas; deep dives are elsewhere |
+| Failure modes and evaluation (RAGAS, test sets) | **Brute-force RAG without LangChain** — referenced; not the main path here |
+
+Staying in scope keeps the guide focused so you can go from zero to a working, maintainable RAG app. You can add streaming, agents, or advanced retrieval later.
+
+---
+
+## Troubleshooting: Common Beginner Issues
+
+When something goes wrong, check this table first. Most “mysterious” RAG bugs come from a few repeated causes.
+
+| What you see | Likely cause | What to do |
+|--------------|--------------|------------|
+| **`ValueError: dimension mismatch`** or similar from the vector store | You used a **different embedding model** at query time than at ingestion (e.g. OpenAI at ingest, HuggingFace at query). | Use the **exact same** embedding model and dimensions for both. Re-index if you already ingested with another model. |
+| **Retriever returns no documents** (empty list) | `score_threshold` is too high, or the store is empty, or the question is unrelated to the corpus. | Lower the threshold (e.g. 0.5) for testing; confirm the store has documents (e.g. check Chroma collection count); try a question that clearly matches your docs. |
+| **LLM gives a generic or wrong answer** (ignores your docs) | The **retrieved context was never passed** into the LLM prompt, or it’s in the wrong place. | Ensure you build the prompt with `context = "\n\n".join([d.page_content for d in docs])` and put `context` into the system/user message. Log the prompt to verify. |
+| **LLM “hallucinates” details not in the docs** | Temperature too high, or no instruction to “answer only from context.” | Set **temperature to 0** (or &lt; 0.5) and add an explicit instruction:  “Answer only using the context below. If the answer is not in the context, say so.” |
+| **Good answer but no way to check the source** | Sources not shown in the UI or logs. | Always **return and display** the list of `Document` objects (or their `page_content` / `metadata`) alongside the answer. Non-negotiable for trust and debugging. |
+| **Different answer every time for the same question** | Expected at temperature &gt; 0. For temp 0, small differences can still happen (model/GPU non-determinism). | Use **temperature 0** for RAG when you want consistency. Don’t rely on exact string match in tests—use semantic or eval metrics. |
+| **“No module named 'langchain_...'”** | Wrong or missing LangChain packages. | Use **LangChain 1.0** modular packages: `langchain-openai`, `langchain-chroma`, `langchain-text-splitters`, etc. Install what you need; avoid old monolithic `langchain` if starting fresh. |
+| **API key errors** | Key not set or not visible to the process. | Set `OPENAI_API_KEY` (or your provider’s env var) in the same shell/process that runs the script, or in a `.env` file loaded with `python-dotenv`. Never hardcode keys. |
 
 ---
 
@@ -30,10 +266,18 @@
 | **Cosine similarity** | Metric in [−1, 1]; 1 = same direction, 0 = unrelated. Used to rank retrieval results. |
 | **Upsert** | Insert or update by ID; basis for incremental indexing. |
 | **Re-index** | Re-embed all documents (required when changing embedding model). |
+| **invoke** | LangChain pattern: call a component with `.invoke(input)`. Retriever, LLM, Tools use it for composability. |
+| **Runnable** | LangChain interface for components that support `.invoke()` (and optionally `.stream()`, `.batch()`). |
+| **Temperature** | LLM sampling parameter: 0 ≈ argmax (deterministic); higher = more variance. Use 0–0.5 for RAG. |
+| **combine_question** | Heuristic: concatenate recent user messages into one string for retrieval. Fixes “she”/“it” reference; can cause topic drift. |
+| **Parent-document retrieval** | Retrieve small chunks, then pass the parent document (or larger window) to the LLM for full context. |
+| **Query rewriting** | Use an LLM to turn the latest user message into a stand-alone question using conversation history (e.g. “What did she do?” → “What did Avery Lancaster do?”). |
 
 ---
 
 ## Part 1: Core Concepts — Vectors & Embeddings
+
+This part answers “what is RAG made of?” You don’t need to write code yet—focus on the ideas. They will make every later step (chunking, retrieval, prompting) easier to reason about.
 
 ### 1.1 Why “Search by Meaning” Exists
 
@@ -95,6 +339,8 @@ In practice, for RAG retrieval we often treat **0.75–0.85** as “strong match
 3. Why does the generator LLM never receive vectors?
 4. If cosine similarity between a query and a chunk is 0.95, is that chunk a good candidate to pass to the LLM? What if it’s 0.4?
 
+**Milestone:** You can explain what a vector is, why we use two kinds of models (encoder vs generator), and how “closeness” in vector space drives retrieval.
+
 ---
 
 ## Part 2: RAG Architecture — The Two-Model Pipeline
@@ -109,6 +355,8 @@ In practice, for RAG retrieval we often treat **0.75–0.85** as “strong match
 6. **Generation:** Send that text to the **generator** LLM → final answer.
 
 So: **Encoder** and **vector store** are for *retrieval*; **generator** is for *answer*. Clear separation.
+
+**Beginner tip:** The LLM never sees vectors. It only ever sees *text* (the retrieved chunks plus the question). If you forget to pass the retrieved chunks into the prompt, the LLM will answer from its training data—and your RAG will look “broken.” Always wire context into the prompt.
 
 ---
 
@@ -130,6 +378,8 @@ RAG is not a solved math problem. It’s **empirical**: chunk size, overlap, mod
 1. List the six steps of the RAG pipeline in order. Where do vectors “stop” being used?
 2. What exactly is passed into the generator LLM: raw vectors or text?
 3. Why is it important to treat RAG as heuristic and invest in evaluation?
+
+**Milestone:** You can draw or recite the full RAG flow (query → encode → search → retrieve text → prompt → generate) and explain why vectors never go to the LLM.
 
 ---
 
@@ -201,6 +451,8 @@ docs = retriever.invoke("What are ticket prices to Heathrow?")
 2. Why is LangSmith “non-negotiable” for debugging RAG in production?
 3. When might you *not* choose LangChain for a project?
 
+**Milestone:** You know what LangChain gives you (abstractions, observability) and you’ve seen the chunking and retriever code patterns you’ll use later.
+
 ---
 
 ## Part 4: Data Preparation — Chunking & Ingestion
@@ -267,6 +519,8 @@ Design metadata early; adding it later often means re-chunking and re-embedding.
 3. Why do we use overlap between chunks? What’s a typical overlap in % of chunk size?
 4. Name two uses of metadata in a RAG system.
 
+**Milestone:** You can implement ingestion: load docs → recursive split with overlap → attach metadata → produce a list of `Document` objects ready for embedding.
+
 ---
 
 ## Part 5: Infrastructure — Encoders & Vector Stores
@@ -283,6 +537,8 @@ The encoder turns text into vectors. This choice **drives accuracy** more than t
 **Dimensions are model-specific.** You cannot mix dimensions in one index: every vector in a store must come from the same embedding model (same dimensions and same “space”).
 
 **Decision:** Benchmark a few encoders on *your* data (accuracy, latency, cost). Often a smaller/cheaper model gets 90%+ of the benefit at half the cost. Start there unless you have proven need for the largest model.
+
+**Beginner trap:** Using one embedding model at ingestion (e.g. OpenAI) and a different one at query time (e.g. HuggingFace) will cause a dimension error or meaningless results. Always use the *same* model for both. Write the model name in config or store metadata so you don’t forget.
 
 ---
 
@@ -314,6 +570,8 @@ Re-indexing has cost: time and (if using paid embedding APIs) money. Plan for it
 2. Why can’t we mix vectors from two different embedding models in one vector store?
 3. If we already run Postgres in production, when would we still consider Pinecone or Weaviate?
 
+**Milestone:** You can choose an embedding model and a vector store for your context (dev vs prod, scale) and know you must re-index if you change the encoder.
+
 ---
 
 ## Part 6: Visualization & Debugging
@@ -336,6 +594,8 @@ Vectors live in high dimensions (e.g. 384 or 1536). We can’t plot that. **t-SN
 
 1. Why do we project vectors to 2D/3D? What can we learn from it?
 2. Why shouldn’t we rely only on 2D proximity to decide if two chunks are “similar” for retrieval?
+
+**Milestone:** You know how to sanity-check your ingested data (e.g. t-SNE) and that 2D is only a hypothesis—validate with real retrieval tests.
 
 ---
 
@@ -394,6 +654,8 @@ Before locking in an encoder:
 2. What should we log for every retrieval call?
 3. What is a simple fallback when vector search returns only low-similarity results?
 
+**Milestone:** You know how to run ingestion safely (incremental, blue/green), what to log, and how to handle errors and config without hardcoding.
+
 ---
 
 ## Part 8: Engineering Decision Matrix
@@ -410,6 +672,316 @@ Use this as a quick reference when making design choices.
 | **Dev vs prod ingestion?** | Static vs changing data | Dev: wipe & reload. Prod: upsert + incremental; blue/green for big re-indexes. |
 | **Vectors “overlapping” in 2D?** | Bug or normal? | Often normal semantic overlap; use metadata filters to narrow when needed. |
 | **LangChain vs raw API?** | Need for observability and integrations | Use LangChain for RAG and observability; raw/lite for simple proxy-only use cases. |
+
+**Milestone:** When you face a design choice (store, model, chunk size, etc.), you can open this matrix and pick a direction instead of guessing.
+
+---
+
+# Implementation Track: Lessons 9–13 (Query Pipeline to Production)
+
+The following sections complete the loop from “static vector library” to “conversational product.” Each lesson is summarized with **how** (mechanics), **why** (engineering rationale), and **when** (when to apply or avoid).
+
+**When to use this track:** After you have ingestion working (documents → chunks → embeddings → vector store). Lessons 9–11 get you to a working query path and UI; Lessons 12–13 cover production structure and failure modes so you can ship and improve systematically.
+
+---
+
+## Lesson 9: The Query Pipeline (Completing the Loop)
+
+### 9.1 What Changes
+
+**Before Lesson 9:** You have a populated vector store (e.g. Chroma). It does not answer questions.  
+**After Lesson 9:** A user question flows through Retriever → LLM → answer, and the UI shows the answer plus source documents.
+
+**Why this matters:** Ingestion is “write”; query is “read.” In production these are often **separate services**: ingestion runs on a schedule or webhook; query runs on every user request. Separating them lets you scale and secure each path independently.
+
+### 9.2 The Flow (Recap)
+
+1. **User question** → e.g. “What are ticket prices to Heathrow?”
+2. **Retriever** → Embeds the question, queries the vector store, returns **text chunks** (as `Document` objects).
+3. **LLM** → Receives question + retrieved chunks (as text in the prompt) → generates answer.
+4. **UI** → Shows answer + **source documents**.
+
+**Engineering note:** The Retriever does **two** things inside a single `invoke()`: (1) embed the query with the same embedding model used at ingestion, (2) run similarity search. You don’t call the vector store or the embedding API directly in your query code—the Retriever abstraction hides that. **When** you swap the vector store (e.g. Chroma → Pinecone), only the Retriever’s backing changes; your query logic stays the same.
+
+### 9.3 LangChain Abstractions: Retriever & LLM
+
+| Abstraction | What it is | What it does | Why use it |
+|-------------|------------|--------------|------------|
+| **Retriever** | Wrapper around Vector Store + Embedding Model | `retriever.invoke(question)` → list of `Document` | Hides embedding + DB lookup; same interface regardless of store. |
+| **LLM / ChatModel** | Wrapper around Generator (GPT-4, Claude, etc.) | `llm.invoke(messages)` → response | Swap provider/model without rewriting chain logic. |
+
+**Return type:** The Retriever returns **`Document` objects** (each with `page_content` and `metadata`), not raw strings. That gives you text for the prompt plus source attribution (e.g. `source`, `doc_type`) for the UI and for debugging.
+
+### 9.4 The `invoke` Pattern (Runnable Interface)
+
+**How:** In LangChain 1.0, Retriever, LLM, Tools, and many other components respond to **`.invoke(input)`**. The exact type of `input` and the return type vary by component, but the method name is consistent.
+
+**Why:** **Composability.** You can build chains (e.g. Retriever → Prompt → LLM) and later add steps (e.g. summarizer, router) because every step has a predictable interface. This is the same idea as a shared interface in classic OOP—polymorphism so you can swap implementations without changing the pipeline.
+
+**When:** Use `.invoke()` for synchronous calls. For streaming or batch, LangChain exposes other methods (e.g. `.stream()`, `.batch()`); the principle of a single “trigger” per component still holds.
+
+### 9.5 User Interface: Show Sources (Trust & Debugging)
+
+**How:** The UI (e.g. Gradio, or a React/Next.js frontend) displays (1) the generated answer and (2) the **source documents** (chunks) used to produce it.
+
+**Why:**
+
+- **Trust:** Users don’t trust a black box. Citations let them verify the answer against the source.
+- **Debugging:** When a user reports “wrong answer,” you inspect the sources. If sources are irrelevant → **retrieval** problem (embeddings/chunking). If sources are relevant but the answer is wrong → **generation** problem (prompt/LLM).
+- **Hallucination signal:** If the UI shows “No sources found,” the user knows the answer may be weak or unsupported.
+
+**When:** Treat source citation as **non-negotiable** for any production RAG UI. Gradio is fine for demos and internal QA; production will typically use a proper frontend with collapsible source cards.
+
+### 9.6 “LangChain Is Optional” Reality
+
+**Reality:** You can build a RAG pipeline with raw API calls (embedding API + vector store client + LLM API) in only a few more lines than with LangChain.
+
+**Why use LangChain anyway?**
+
+- **Observability:** LangSmith gives traces (latency per step, token counts, retrieved doc IDs, similarity scores). Essential for debugging RAG.
+- **Consistency:** Same patterns across the team; easier to maintain and swap components.
+- **Integrations:** Many vector stores and loaders are pre-wired.
+
+**When to skip LangChain:** If you need ultra-low latency and want to strip every abstraction and dependency, a minimal custom pipeline may be justified. For most enterprise RAG, observability and standardization outweigh the extra lines of code.
+
+### Lessons 1–9 Unified (Status)
+
+| Phase | Lessons | Component | Status |
+|-------|---------|-----------|--------|
+| Theory | 1–3 | Vectors, embeddings, architecture | ✅ |
+| Framework | 4 | LangChain ecosystem | ✅ |
+| Ingestion | 5–8 | Chunking, embedding, Chroma, viz | ✅ |
+| Query | 9 | Retriever, LLM, UI, invoke | ✅ |
+
+**Checkpoint (Lesson 9):** What does the Retriever do with the embedding model and vector store when you call `invoke(question)`? Why is it important to show source documents in the UI?
+
+---
+
+## Lesson 10: Pipeline Parameters & Temperature
+
+### 10.1 Embedding Consistency Rule (Golden Rule)
+
+**Rule:** The embedding model used at **query** time **must** be the same as the one used at **ingestion** time.
+
+**Why (two layers of failure):**
+
+1. **Dimension mismatch:** If ingestion used 1536-dim vectors (e.g. OpenAI) and query uses 384-dim (e.g. all-MiniLM-L6-v2), the vector store will raise a **ValueError** (dimension mismatch). The code fails at runtime.
+2. **Semantic mismatch:** Even if two models had the same dimension (e.g. both 768), they map meaning to different coordinates. A vector from model A is meaningless in an index built with model B—retrieval quality collapses.
+
+**When / how to enforce:**
+
+- Store the **embedding model name/version** in the vector store’s metadata (or in config tied to that store) at ingestion time.
+- At query time, check that the current embedding model matches. If not, **abort and alert** instead of running a broken search.
+
+### 10.2 Retriever & ChatModel (Recap)
+
+- **Retriever:** `vectorstore.as_retriever()` — wraps store + embeddings; `invoke(query)` returns list of `Document`.
+- **ChatModel:** e.g. `ChatOpenAI(model="gpt-4o-mini", temperature=0)` — wraps the generator; `invoke(messages)` returns the reply. You can swap to `ChatAnthropic` or another provider with minimal code change.
+
+### 10.3 Temperature: What It Is and How to Use It
+
+**What it is (mechanism):** Temperature controls **probability sampling** for the next token, not “creativity” in the abstract.
+
+- **Temp = 0:** Choose the token with **highest probability** (argmax). Mostly deterministic.
+- **Temp = 1:** Sample according to the model’s probability distribution.
+- **Temp > 1:** Flatten the distribution; lower-probability tokens become more likely → higher variance.
+
+**Why it matters for RAG:** We want answers **grounded in retrieved context**, not creative variation. So for RAG we keep temperature **low (0–0.5)**; for medical/legal/financial bots, **0** is standard.
+
+**When:** Use **temperature 0** (or low) for factual RAG. Use higher temperature only for clearly creative tasks (e.g. story generation).
+
+### 10.4 Reproducibility: Don’t Rely on It
+
+**Reality:** Even with temperature 0, the same query can yield slightly different answers over time.
+
+**Why:**
+
+- **Model drift:** Providers update models silently; “gpt-4” today may not equal “gpt-4” in six months.
+- **Parallelism:** GPU execution order can vary; floating-point non-determinism can change which token is “max.”
+
+**When / how:** Don’t write tests that depend on **exact string match**. Test for **semantic equivalence** (does the answer mean the same thing?) or use evaluation metrics (e.g. faithfulness, relevance). Pin model versions (e.g. `gpt-4-0613`) when you need more stability.
+
+### Lessons 1–10 Unified
+
+| Phase | Lessons | Component | Status |
+|-------|---------|-----------|--------|
+| Theory | 1–3 | Vectors, embeddings, architecture | ✅ |
+| Framework | 4, 9 | LangChain, invoke | ✅ |
+| Ingestion | 5–8 | Chunking, embedding, Chroma, viz | ✅ |
+| Query | 9–10 | Retriever, LLM, temperature | ✅ |
+
+**Checkpoint (Lesson 10):** Why must ingestion and query use the same embedding model? Why use low temperature for RAG? What are two reasons the same query can give different answers even at temperature 0?
+
+---
+
+## Lesson 11: Stitching Retrieval + Generation
+
+### 11.1 The Stitching Problem (Retriever ≠ LLM)
+
+**Critical point:** The LLM has **no** access to your vector store. If you call `llm.invoke("Who is Avery?")` with no context, you get a generic answer from training data, not from your documents.
+
+**How we fix it:** We **orchestrate two steps** and pass the result of the first into the second:
+
+1. **Retriever:** `retriever.invoke(question)` → get relevant chunks.
+2. **Context string:** Build one string from chunk `page_content` (e.g. `"\n\n".join([d.page_content for d in docs])`).
+3. **Prompt:** Inject that string into a **system prompt** (or equivalent) so the LLM is told to answer using only this context.
+4. **LLM:** `llm.invoke([SystemMessage(prompt), HumanMessage(question)])` → answer.
+
+**Why this is “two API calls”:** Embedding API (for the query vector) + LLM completion API. That doubles latency and cost per query compared to a raw LLM call. **When** optimizing, consider caching, smaller context, or fewer retrieved chunks.
+
+### 11.2 Prompt Templates (The Glue)
+
+**How:** Use a fixed **system prompt template** that includes placeholders for `{context}` and possibly `{question}`. Example: “Answer only using the following context. If the answer is not in the context, say so. Context: {context}”
+
+**Why:**
+
+- **Consistency:** Every query gets the same structure and instructions.
+- **Safety:** Explicit “if you don’t know, say so” reduces hallucination.
+- **Separation:** Prompt logic stays out of retrieval logic; easier to test and tune.
+
+**When / security:** Treat `{context}` as **untrusted** (it came from retrieval). Sanitize or wrap it in delimiters (e.g. `<context>...</context>`) to reduce prompt injection via retrieved text.
+
+### 11.3 The Minimal Chain (Manual Chaining)
+
+A minimal “5-line” pattern:
+
+```python
+docs = retriever.invoke(question)
+context = "\n\n".join([d.page_content for d in docs])
+prompt = system_prompt.format(context=context)
+response = llm.invoke([SystemMessage(prompt), HumanMessage(question)])
+return response.content
+```
+
+**What’s often missing in production:** Error handling (Chroma down, empty `docs`), **logging** (which docs were retrieved, scores), and use of **history** (this version is stateless). For multi-turn, you need message history and a strategy for what to pass to the retriever (see Lesson 12).
+
+### 11.4 Fuzzy Matching (Semantic Payoff)
+
+**Why RAG handles typos and paraphrasing:** We match on **vectors** (meaning), not keywords. “Who is Avery?” vs “Who is Lancaster?” vs slight misspellings can all retrieve the right chunk because the embedding captures intent. This reduces friction: users don’t need the exact wording from your docs.
+
+### Lessons 1–11 Unified
+
+| Phase | Lessons | Component | Status |
+|-------|---------|-----------|--------|
+| Theory | 1–3 | Vectors, embeddings, architecture | ✅ |
+| Framework | 4, 9 | LangChain, invoke | ✅ |
+| Ingestion | 5–8 | Chunking, embedding, Chroma, viz | ✅ |
+| Query | 9–10 | Retriever, LLM, temperature | ✅ |
+| Pipeline | 11 | Prompting, chaining, UI | ✅ |
+
+**Checkpoint (Lesson 11):** Why can’t the LLM answer from your docs if you don’t pass retrieved context? What two API calls does a single RAG query typically imply?
+
+---
+
+## Lesson 12: Production Modularization
+
+### 12.1 From Notebooks to Modules
+
+**Why modules over notebooks in production:**
+
+| Notebooks | Modules |
+|-----------|---------|
+| Linear, stateful execution | Reusable functions, stateless |
+| Hard to test, hard to deploy | Unit-testable, CI/CD-friendly |
+| Fragile for long runs | Robust, clear boundaries |
+
+**When:** Use notebooks for exploration and one-off analysis. Use **modules** for ingestion and query code that runs in cron jobs, webhooks, or API servers.
+
+### 12.2 Package Structure (Strategy Pattern)
+
+**How:** Split into an **implementation** package that exposes a small interface, e.g.:
+
+- `fetch_context(question, history)` → retrieved chunks or context string.
+- `answer_question(question, history)` → final answer (and optionally sources).
+
+The **UI** (e.g. `app.py` or a FastAPI app) depends only on these two functions, not on Chroma or a specific embedding model. You can have `implementation_v1/`, `implementation_v2/`, and swap via config or env (e.g. `IMPLEMENTATION_PATH=implementation_v2`).
+
+**Why:** **Dependency inversion.** The app depends on an interface, not concrete implementations. That enables A/B testing (different chunking, models, or retrieval strategies) and quick rollback without changing the UI.
+
+### 12.3 ingest.py vs answer.py (Write vs Read)
+
+- **ingest.py:** Loads documents → chunks → embeds → writes to vector store. **When:** Run on a schedule, webhook (e.g. new doc in S3), or CI. In prod, use **incremental** ingestion (upsert by `document_id`); avoid full wipe.
+- **answer.py:** Loads retriever + LLM, implements `fetch_context` and `answer_question`. **When:** Called on every user request (e.g. FastAPI endpoint). Only **reads** from the vector store.
+
+**Why separate:** Different scaling (ingestion can be CPU/heavy; query needs low latency), different permissions (query service should not be able to wipe the store), and independent deploy (fix answer logic without re-running ingestion).
+
+### 12.4 History Handling (Multi-Turn)
+
+**Problem:** The UI (e.g. Gradio) passes conversation history as a list of dicts (`role`, `content`). LangChain’s `ChatModel.invoke()` expects **LangChain message objects** (`HumanMessage`, `AIMessage`, etc.). Passing raw dicts can cause `TypeError` or wrong role handling.
+
+**How:** Convert UI history to LangChain messages before calling the LLM. That preserves roles and ordering so the model sees a proper multi-turn conversation.
+
+**combine_question for retrieval:** For retrieval, we need a **single query**. A naive approach is to use only the latest message (“What did she do before?”). The retriever doesn’t know “she” = Avery. So we **combine** recent user messages into one query string (e.g. “Who is Avery? What did she do before?”) and run retrieval on that. **When** this is wrong: when the user **changes topic** (e.g. “Who won the IIoT award?”); the combined query can still be dominated by “Avery” and return the wrong context (topic drift). Alternatives: **query rewriting** (LLM turns the last question into a stand-alone question using history), **sliding window** (only last N messages), or **topic detection** (reset context on subject change). A/B test these strategies.
+
+### Lessons 1–12 Unified
+
+| Phase | Lessons | Component | Status |
+|-------|---------|-----------|--------|
+| Theory | 1–3 | Vectors, embeddings, architecture | ✅ |
+| Framework | 4, 9 | LangChain, invoke | ✅ |
+| Ingestion | 5–8, 12 | Chunking, embedding, Chroma, modularization | ✅ |
+| Query | 9–11, 12 | Retriever, LLM, history, interfaces | ✅ |
+| Production | 12 | Modules, swappability, DevOps | ✅ |
+
+**Checkpoint (Lesson 12):** Why separate ingest and answer into different modules? Why convert UI message history to LangChain message types? What is one downside of combining all user messages for retrieval?
+
+---
+
+## Lesson 13: Failure Modes & Empirical Tuning
+
+### 13.1 Naive vs Proper Implementation
+
+**Naive (broken):** No history; retrieval only on the latest question. Example: user asks “Who is Avery?” then “What is her salary?” — the retriever searches for “What is her salary?” and may return any doc about “salary” (e.g. another person). **Why it fails:** No link between “her” and Avery; wrong context.
+
+**Proper (Lesson 12):** Convert history to LangChain messages; use **combine_question** (or similar) so retrieval sees “Who is Avery? What is her salary?” and returns Avery’s context. **But** this introduces **topic drift** when the user switches subject (e.g. “Who won the IIoT award?”) — the combined query still emphasizes “Avery” and can return the wrong chunks. So we iterate: query rewriting, sliding window, or topic detection, and **measure** impact.
+
+### 13.2 Chunking Boundary Failures
+
+**Example:** User asks “Who won the prestigious IIoT award?” Answer: “Maxine was recognized…” but not “Maxine Thompson.” **Why:** The chunk that contains “received the prestigious IIoT award” was split so that “Maxine Thompson” (full name) stayed in another chunk. Retrieval returned the right chunk for “award,” but the LLM never saw the full name.
+
+**How to mitigate:**
+
+- **Increase chunk overlap** so names and key facts are less likely to be split across boundaries.
+- **Parent-document retrieval:** Store small chunks for retrieval, but when a chunk is retrieved, pass the **parent document** (or a larger window) to the LLM so it sees full names and surrounding context.
+- **Metadata enrichment:** Attach `full_name`, `document_id`, etc., to chunks so the LLM can use metadata even when the exact phrase is in another chunk.
+
+**When:** If the answer is “almost right” but missing an obvious detail (e.g. full name, date), inspect **chunk boundaries** first before blaming retrieval or the LLM.
+
+### 13.3 RAG Is Empirical (Trial and Error)
+
+**Reality:** RAG is heuristic. Many parameters interact: chunk size, overlap, embedding model, top_k, similarity threshold, and history/query strategy. There is no closed-form “correct” setting.
+
+**How to improve systematically:**
+
+| Practice | Purpose |
+|----------|---------|
+| **Evaluation harness** | Golden set of Q&A; run after every change; track metrics (e.g. context relevance, answer faithfulness). |
+| **Logging & tracing** | Log every retrieval (query, doc IDs, scores); use LangSmith or equivalent for debugging. |
+| **A/B testing** | Compare configurations (e.g. combine_question vs query rewriting) on real or synthetic traffic. |
+| **Metrics dashboard** | Track accuracy, latency, cost over time so you see regressions. |
+
+**When:** Don’t guess parameters. **Measure.** Build a test set of 50–100 representative queries, run the harness on each change, and block deploy if scores drop (or alert and investigate).
+
+### 13.4 Manual Evaluation (LLM-as-Judge)
+
+**How:** Curate a set of questions with expected answers (or criteria). Run the RAG pipeline on each; use another LLM to score relevance, faithfulness, or correctness (e.g. 1–10 or binary). Automate this in CI so regressions are caught before deploy.
+
+**Why:** This is the core idea behind tools like RAGAS and TruLens—automated, repeatable evaluation so “it works on my examples” becomes “it meets a defined bar.”
+
+### Lessons 1–13 Unified
+
+| Phase | Lessons | Component | Status |
+|-------|---------|-----------|--------|
+| Theory | 1–3 | Vectors, embeddings, architecture | ✅ |
+| Framework | 4, 9 | LangChain, invoke | ✅ |
+| Ingestion | 5–8, 12 | Chunking, embedding, Chroma, modularization | ✅ |
+| Query | 9–11, 12 | Retriever, LLM, history, interfaces | ✅ |
+| Production | 12 | Modules, swappability | ✅ |
+| Failure analysis | 13 | Topic drift, chunk boundaries, empirical tuning | ✅ |
+
+**Checkpoint (Lesson 13):** What is one alternative to combining all user messages for retrieval? How can you mitigate “correct but incomplete” answers due to chunk boundaries? Name two practices to move from ad-hoc tuning to systematic improvement.
+
+**Milestone (Lessons 9–13):** You have a full query path (Retriever → LLM), understand temperature and embedding consistency, can stitch prompt + context, and know how to modularize and debug failure modes. You’re ready to run evals and ship.
 
 ---
 
@@ -486,19 +1058,21 @@ project/
 
 You now have:
 
-- **Glossary:** Quick reference for RAG, encoder, retriever, chunk, vector store, cosine similarity, upsert, re-index.
+- **Big picture & path:** What you’ll build (documents → chunks → store → Q&A with citations), **prerequisites** (Python, env, API keys), **learning path** table, **pipeline diagram**, **build order** (setup → quick start → ingest → query → UI → harden), **quick start** script to run RAG in one file, **scope** (what’s in and out), and **troubleshooting** for common beginner issues.
+- **Glossary:** RAG, encoder, retriever, chunk, vector store, cosine similarity, upsert, re-index, **invoke**, **Runnable**, **Temperature**, **combine_question**, **parent-document retrieval**, **query rewriting**.
 - **Concepts:** Vectors vs tokens, encoders vs generators, cosine similarity, why RAG works.
 - **Architecture:** The two-model RAG pipeline and where vectors are used (and where they are not).
 - **Framework:** What LangChain is, why we use it, code patterns (chunking, retriever with `similarity_score_threshold`, RAG chain).
 - **Data:** Why we chunk, how to chunk (recursive + overlap), metadata, and **contracts** (Document, retriever, idempotent document_id).
-- **Infrastructure:** Encoder = quality/cost; store = scale/ops; re-index when you change the encoder.
-- **Debugging:** t-SNE and logging to form hypotheses and validate with retrieval tests.
+- **Infrastructure:** Encoder = quality/cost; store = scale/ops; re-index when you change the encoder; **ingestion model must equal query model**.
+- **Implementation track (Lessons 9–13):** Query pipeline (Retriever + LLM, invoke, UI with sources), **temperature** (low for RAG, reproducibility caveats), **stitching** (prompt template, two API calls per query), **modularization** (ingest vs answer, history handling, combine_question trade-offs), **failure modes** (topic drift, chunk boundaries, parent-document retrieval, systematic evaluation).
+- **Debugging:** t-SNE and logging to form hypotheses and validate with retrieval tests; **source citations** for trust and debugging.
 - **Operations:** Incremental indexing, logging, fallbacks, **error handling** (timeouts, retries, partial failure), **configuration & secrets**, and benchmarking.
 - **Testing:** Unit tests (chunking), integration tests (retriever shape, RAG pipeline), and an eval harness (RAGAS/TruLens) in CI.
-- **Structure:** Clear separation of ingestion vs query path and a suggested project layout.
+- **Structure:** Clear separation of ingestion vs query path, suggested project layout, **interface over implementation** for swappability.
 - **Anti-patterns:** What not to do (vectors to LLM, wiping prod, no threshold, hardcoded config, mixing dimensions, re-index in request path).
 - **References:** LangChain docs, RAGAS/TruLens, LangSmith.
 
-Next step is to **build a minimal RAG pipeline** (one encoder, one vector store, one LLM) with LangChain, add logging and a similarity threshold, then run the checks in this guide on your own data. If you can answer all the “Check Your Understanding” questions and explain the decision matrix, you’re ready to own a production RAG feature.
+Next step is to **build a minimal RAG pipeline** (one encoder, one vector store, one LLM) with LangChain, add logging and a similarity threshold, then run the checks in this guide on your own data. Work through the **Implementation Track (Lessons 9–13)** to complete the loop from ingestion to production-style modularization and failure analysis. If you can answer all the “Check Your Understanding” and checkpoint questions and explain the decision matrix, you’re ready to own a production RAG feature.
 
 — Todd

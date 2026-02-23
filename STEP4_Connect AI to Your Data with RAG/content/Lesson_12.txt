@@ -1,0 +1,431 @@
+Well, I imagine you are pleasantly surprised by how easy it's been to build a rag pipeline, and you
+
+may be thinking to yourself, I wonder that's that's all well and good, but we've been doing it very
+
+much in a notebook and in experimental way, and hopefully you're comfortable doing that.
+
+It's important to be able to have an experimenter's hat on, but there comes a point when you want to
+
+take the hat off and put on like, like something that's ready to to engineer this and to be ready to
+
+implement it in production.
+
+And to do so, we would want to do that in Python modules.
+
+And so that is what I've done.
+
+I've taken the code we put in the notebook, and I've turned them into modules for us to look at.
+
+And that is the way that you would do it yourself as well.
+
+If you're building proper ingest pipes.
+
+And the the way I've done it is I've made two different Python modules and I've put them in a single
+
+directory called implementation, a package, a Python package implementation.
+
+And the reason I've done that is because later this week we are going to improve on this rag and we're
+
+going to want to have a different implementation.
+
+And I want to be able to swap it.
+
+And I want you to make an implementation as well and make it even better.
+
+And so this allows us to be able to have like swappable implementations in one directory.
+
+There are two modules that we will have in this directory.
+
+Okay.
+
+What are these two modules.
+
+So the first of them is called ingest.py.
+
+And that's basically like the lab that we did not today but yesterday.
+
+The one that is going to read in a knowledge base, turn documents into chunks, turn chunks into vectors,
+
+store them in chroma that will all be in ingest.
+
+Py you can do.
+
+You've run, ingest py and it's going to do all that.
+
+And it could be part of your, your your Rag pipeline, your data ingest pipeline that has new files
+
+arrive.
+
+This automatically gets called and it runs.
+
+The other module is called answer.py.
+
+And it's a very simple module.
+
+It has two key functions that could be called by the outside world.
+
+One of them is called fetch context.
+
+Given a question we'll get relevant context and the other is called answer question.
+
+Given a question and some history, it will fetch relevant context and answer the question that is in
+
+answer.
+
+And the idea is that you could change this.
+
+You could write your own ingestor to ingest the data and your own answer to accompany it, using consistent
+
+encoder and so on.
+
+You just have to implement fetch context and answer question and everything else will work.
+
+So that's that's the scaffolding that I put in place.
+
+And those are the two modules that I have written.
+
+So how will we actually use these modules.
+
+Well I've got a few ways that we'll be able to to put these into practice.
+
+And the one we'll do today is that I've made a gradio application called App.py, which is in in the
+
+week five, and the parent directory to implementation and App.py will bring up a nice Gradio user interface.
+
+And we'll call answer.py to get answers to questions.
+
+And we can always swap out with a different implementation and still keep that same UI.
+
+And it's.
+
+So that means that that ultimately we're going to be able to do two different, uh, UV runs.
+
+We'll be able to say UV run ingests Py will actually do that from within the implementation directory.
+
+So we'll do CD implementation.
+
+And then you've run ingest.py and it will run the whole ingest.
+
+And you could imagine this could be something if you had data pipes.
+
+This could be something that is automatically triggered whenever a file changes in that directory.
+
+Or a cron job runs this every hour or something like that.
+
+So.
+
+So this will automatically populate our Chrome data store.
+
+And then from the week five directory, the parent directory we can do you've run App.py.
+
+And that of course will launch our UI.
+
+Okay.
+
+Let's go and have a look at this.
+
+So in week five there is this folder implementation.
+
+And sure enough it just has these two classes two class two modules.
+
+Ingest and answer.
+
+Let's start by looking at ingest.
+
+And this really is just the stuff from lab to lab.
+
+One was when we did the fake version.
+
+Lab two was the proper version.
+
+You can look at lab two and compare it.
+
+You'll see that it's basically the same stuff.
+
+I've tidied it up a little bit to put it in ingest pie.
+
+Um, this is this is a way to make sure we've got the right path to our database and our knowledge base.
+
+This is where we are creating the embeddings, the hugging face embeddings.
+
+And then you can see I've got fetch documents, fetches the documents using lang chains code create
+
+chunks using the recursive character text splitter.
+
+The chunk size is 1000, an overlap of 200 characters per chunk, and we split up the documents that
+
+gives us the chunks, create the embeddings, deletes chroma if it's already there, and then creates
+
+chroma passing in the chunks, passing in the embeddings, passing in the directory name.
+
+And then it prints that we've created the vectors with the dimensions.
+
+And then if this is you've run, what should it do.
+
+Well it should fetch the documents, create the chunks from those documents, create the embeddings
+
+from those chunks.
+
+And then we're done.
+
+That's that's what ingest Pie does.
+
+Should we see it working.
+
+Let's have a shot.
+
+Okay, so first of all, we bring up a new terminal window and cursor that is control shift and backtick
+
+to have a new terminal.
+
+Uh, or you can also go to the view menu and select terminal to open a terminal.
+
+And we start in the LM engineering directory.
+
+So we do CD week five to go into week five.
+
+And then we're going to go into the implementation directory CD implementation.
+
+If I do an LZ you'll see we have ingest Pi and Pi are right there.
+
+We do.
+
+You've run ingest dot pi and take a drum roll and off it goes.
+
+So it's doing a fetch documents.
+
+Then it's going to do create chunks of those documents then create embeddings.
+
+And then it will print ingestion complete as it prints faster than I can say.
+
+All of that.
+
+And it says there are 413 vectors with 384 dimensions in the vector store.
+
+That is a successful ingest run.
+
+Okay, time to look at answer dot pi.
+
+So control and backtick again takes out that terminal.
+
+Or you can just press the bin or the X button over there.
+
+Go to answer.py.
+
+Let's have a look at this.
+
+As I say, it is just the same code from lab three here.
+
+Same same set of imports.
+
+Slightly fancier way of making sure we're looking at the right place for the vector database in a platform
+
+independent way.
+
+Uh, same same model right here.
+
+All mini LM L62.
+
+Note that there are those two different places.
+
+If we change this model two two places to change it.
+
+Retrieval.
+
+Okay I have separated this.
+
+This is how many chunks get included.
+
+Get retrieved and included in the prompt.
+
+I think we saw that it was it was doing for before.
+
+You can actually specify how many chunks you want.
+
+And here we're specifying five same system prompt as before.
+
+As before we create the vector store the retriever and the LM.
+
+These are the two key objects that that we needed to build that we can call invoke on and fetch.
+
+Context is one of those functions I told you about the big, big, big functions.
+
+We're implementing.
+
+It takes a question and it just calls retriever dot invoke for that question.
+
+And this is where we pass in k.
+
+K is five so that five chunks are retrieved.
+
+And then this is the other big thing.
+
+Answer question.
+
+It takes a question and it takes some history.
+
+So I've got something here.
+
+It's a little bit more than the five lines.
+
+You might say.
+
+There's more than five lines.
+
+There are a few more lines now because there's a couple of things that I'm doing differently here,
+
+which relates to slight problems with that naive Gradio app from last time.
+
+I wonder if you found them.
+
+If you were playing with it, you might have very quickly discovered that there were a couple of hitches
+
+with it.
+
+So the first hitch, of course, is that we were completely ignoring history.
+
+So if the user said, if you said like, like, um, who is who is Avery?
+
+And then you said, and what did she do before?
+
+It wouldn't be able to answer that because it wouldn't know who.
+
+Every time.
+
+It was like a completely fresh message.
+
+We weren't passing in the conversation history every quarter.
+
+An LLM is stateless.
+
+It would have been just like when I said my name is Ed.
+
+Who am I?
+
+A couple of weeks ago, you saw that it just doesn't work at all.
+
+So this time I have I have done this properly.
+
+We take in the history and we do actually make use of it.
+
+Um, so lang chain, this is passed in as the normal list of dicts from the open AI format.
+
+Lang chain doesn't like that Lang chain likes its fancy type of messages with with that human message
+
+object and an AI message object.
+
+And there's actually a convenient way of saying, um, the convert to messages.
+
+So lang chain object that I that I lang chain function that I imported here convert to messages.
+
+And if you do that then it converts open AI style messages into lang chain style messages.
+
+So we do that.
+
+And then when I call invoke LM invoke I'm calling that with the proper formatted messages, with the
+
+original, with the system message, and then with all of the history converted into Lang chain format.
+
+That's not clear to you.
+
+Put in a few print statements.
+
+When you run it a few times, you'll see exactly what I mean.
+
+Changing it from being the OpenAI format that Gradio passes in into being the Lang chain format of these
+
+system message and human messages and AI messages in a list.
+
+So that's what this does, and it packages it up nicely so we can call invoke.
+
+There's one other thing I'm doing which you may have spotted.
+
+This extra function I put in called Combined question.
+
+And this one is kind of subtle.
+
+And you might want to implement this differently.
+
+This kind of depends on how you want to do things.
+
+See if you can figure out what's going on there.
+
+So the answer is this is this is a subtle thing which Lang used to to do behind the scenes in a way
+
+that that meant that you didn't have as much control over it.
+
+So I like the fact that it's very much in our hands with this implementation.
+
+So the question is, when you're looking up the relevant context, should you only do that based on
+
+the most recent question from the user, or do you need to look at all of the conversations so far and
+
+look up the context based on that?
+
+Or perhaps you should do it individually for each of those questions and gather all of that context.
+
+There's different ways to do it, and it really depends on the use case.
+
+It depends on what you're trying to do.
+
+It depends on the scenario.
+
+So there's no right answer.
+
+So I used to have this that it only looked at the context based on the most recent message you gave.
+
+But that wasn't great because you could say something like, uh, who is Avery?
+
+And it would it would answer, of course.
+
+And then you could say, and what did she do before?
+
+And even though it's getting the full history so it knows we're talking about Avery, when it looks
+
+up the context, it's looking it up on the on the statement, what did she do before.
+
+And there's no relevant context for that.
+
+It doesn't know that that's Avery.
+
+So perhaps a better way to do it is when fetching the context, don't just fetch context based on the
+
+most recent message, fetch context based on all the things the user has said so far, package that
+
+up.
+
+put it into a combined question, and fetch the context on that combined question.
+
+So again, if that's not super clear to you, put in some print statements.
+
+You'll see exactly what I mean.
+
+When I'm looking up in Chrome.
+
+I don't just look up based on the most recent question from the user, I do it based on everything the
+
+user has said.
+
+And maybe if you're one step ahead of me, you can think there's a better way of doing that and there
+
+is a better way of doing it.
+
+And we may we may mention that later in the week, perhaps when we think of more advanced implementations.
+
+But you can puzzle right now and see if you can figure out what would be a nicer way of doing it, to
+
+make sure that we do query well on something really good that's based perhaps on the most recent thing,
+
+perhaps on some of the the history as well.
+
+Have a think about that.
+
+We will revisit for now.
+
+Uh, let's press on.
+
+We've got our answer question function.
+
+I think what's what's what's left surely is for us to try this out.
+
+And what better way to try it out than in a nice Gradio UI?

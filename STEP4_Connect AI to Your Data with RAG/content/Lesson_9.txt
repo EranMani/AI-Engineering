@@ -1,0 +1,289 @@
+And welcome to week five, day three.
+
+Yesterday we did the first kind of half of Rag by taking documents, putting them into vectors, into
+
+chroma.
+
+Today we're finishing it off.
+
+We're completing a Rag pipeline.
+
+It's all going to happen today.
+
+And I tell you, it's going to be remarkably simple.
+
+I think you're going to be pleasantly surprised by how easy it is to build a Rag pipeline.
+
+And as a quick reminder of what you've already done, you can already generate text, generate code
+
+frontier models with open source models.
+
+Using the Huggingface Transformers library, you can choose the right model for your project, backed
+
+by metrics from leaderboards and benchmarks and so on.
+
+And now.
+
+And now you can explain how Rag uses vector embeddings.
+
+It takes documents.
+
+It turns documents into chunks.
+
+It turns chunks into vectors.
+
+It stores vectors in chroma.
+
+Okay, today we're completing the picture.
+
+By the end of today, you're going to be able to use Lang long chain to build a Rag pipeline, you're
+
+going to be able to deliver a question answerer expert using Rag.
+
+And best of all, you're going to be able to have a nice little gradio user interface, which is going
+
+to be like a Rag application that not only will be able to answer questions with expertise, but it
+
+will be able to show you the documents that it's sourced that expertise from.
+
+Isn't that great?
+
+We're going to do all that today.
+
+Let's get started.
+
+And don't kill me.
+
+But we're going to start by one more time doing our recap of the big idea behind rag.
+
+I know you say you get it.
+
+Do we have to reuse redo the same slides again?
+
+But yes, because sometimes repetition helps.
+
+And just in case, because because some people still have some misconceptions about Rag.
+
+And it's so important to have the foundations understood, the user asks a question.
+
+It comes to our code.
+
+We could take that question and just try and see if we can do a SQL query, if we can just do a text
+
+search.
+
+But that would miss important stuff.
+
+There's a better way to do it.
+
+There's a trick that involves using LMS, a different kind of LM, not the one we're used to the autoregressive,
+
+but AR one that's sometimes called an encoder, sometimes called an embedding model.
+
+There it is.
+
+And we call it to turn the question into a vector.
+
+And we can then say all right let's look in a database.
+
+We've got of lots of other documents where we have indexed those documents by creating vectors of each
+
+of them.
+
+And we put them in a database that is particularly quick at finding documents with vectors, with indexes
+
+that are close to the vector we pass in.
+
+And we can use that to retrieve relevant contexts.
+
+Put that in the prompt to the LM.
+
+Get back the results that that's the big idea behind Rag.
+
+And that's what we're going to implement today.
+
+And then one more time to to remind you what we did yesterday, we read in all the documents in a bunch
+
+of folders in four different folders.
+
+We broke them up into chunks.
+
+This very hacky process of just saying, all right, let's take the text and just sort of slice it up.
+
+We use that recursive character text splitter that just looks for two empty lines, and then one empty
+
+line and then spaces breaks it all up.
+
+We do that.
+
+We have some overlap between the chunks.
+
+Do you remember that 1000 characters, 200 characters of overlap.
+
+And then we use that to turn them into vectors.
+
+And then we stored them in chroma.
+
+And I banged on about the fact that there's a difference between the encoder.
+
+The embedding model that makes the vectors and chroma the data store.
+
+It could be it could be a bunch of other data stores.
+
+That's where they get stored.
+
+That's good at quick retrieval.
+
+I said, you know, popular encoders.
+
+We've got the OpenAI text embedding.
+
+We looked at small and large, small three and large three.
+
+We looked at we didn't look at Gemini embeddings, but they are great.
+
+Uh, and then there's also hugging face all mini Ml6 V2, which we looked at first.
+
+And I said separate to the encoders is the the vector stores the place where you put them and retrieve
+
+them.
+
+And we use chroma, the open source data store.
+
+There's also Kudrin, there's vice, there's many others.
+
+There's paid ones which are much more scalable and resilient.
+
+But you have to pay for them.
+
+You get what you pay for.
+
+And there's pinecone.
+
+We've yet many, many more.
+
+And then I also mentioned that the mainstream databases themselves all support vectors to what you what
+
+you sign up for here is more of an infrastructure decision, more of something which which relates to
+
+things like the the costs involved, the support structure, the the performance.
+
+And then some of them, I think I mentioned have more advanced features like elastic lets you filter
+
+very quickly at the same time concurrently with looking for the nearest nearest vectors.
+
+So these are the kinds of trade offs you take into account as you pick your vector store.
+
+But separately to that, you pick your encoder, your embedding model, so that it gets the right kind
+
+of vectors for the problem that you're working on.
+
+And we'll talk more about that tomorrow.
+
+Okay.
+
+So we are now going to talk about Lang Chain.
+
+We're going to use Lang Chain to implement our Rag pipeline, and I do want to make the point that it's
+
+good to use long chain.
+
+This was one of the first places where long chain really shined, because it was so easy to to use long
+
+chain to build a rag pipeline.
+
+And so it became very, very popular.
+
+So it makes sense that I'm introducing it for this use case.
+
+But I will make the point that it is actually also very easy to build a Rag pipeline without using long
+
+chain.
+
+It's not like long chain is an essential part of building Rag.
+
+It does make things a bit quicker for us.
+
+You'll see it's going to be just a couple of lines of code that's going to be it, but it would only
+
+be a few more lines of code if we did it, like the manual brute force way, which is what we do in
+
+in week eight.
+
+And I say brute force, but it's honestly it's just a couple more lines of code.
+
+It's not much more at all.
+
+But anyways, for now we're going to focus on long chain and you'll see why people love Long chain.
+
+We're going to take two of the key abstractions.
+
+One of them is is an LM, uh, and that is like an object.
+
+And in fact, we already met this.
+
+We already used this abstraction in Lang Chain a couple of weeks ago when when I compared it with light
+
+LM and we saw how you can you can use Lang chain just to sort of wrap an LM so you can swap in open
+
+AI or anthropic or Lama or whatever in place.
+
+And it will, it will respond in the same way.
+
+And then another, another abstraction we're going to work with is something called a retriever.
+
+And a retriever is an abstraction around chroma, the data store and also the embedding model.
+
+That's all sort of wrapped up into this thing called the retriever.
+
+So you can just ask the retriever to retrieve documents close to similar to another document retrieval.
+
+So these are the two key abstractions.
+
+And as with many of lang chains abstractions, it responds to a method invoke.
+
+If you have an LLM, you can say my LLM dot invoke.
+
+If you have a retriever, you can say my retriever dot invoke.
+
+And there are many other objects in Lang chain that have this same behavior, uh, tools.
+
+Uh, and many more.
+
+That's it's a very common part of the framework.
+
+It's actually so it's called a runnable in Lang chain if you can call invoke.
+
+And in the prior version runnable was something that was very much surfaced.
+
+So so you saw runnable in the in the code a lot and people talked about it.
+
+But that appears they appear to have taken that out as a sort of main as an, as an interface, as something
+
+that you, that you particularly refer to in the code in lang chain one zero.
+
+Uh, so, so whilst we know that all of these things are runnable, that's, that's not a term that's
+
+as commonly used in Lang chain 1.0.
+
+And for sure we are going to be using Lang Chain 1.0, the new version of Lang chain.
+
+So we'll have an we'll have a retriever.
+
+It will take the method invoke.
+
+There are other methods you can call as well like Stream and Invoke for async invoke.
+
+We won't be doing those.
+
+But but you can bear in mind that there are these common things that any of the major abstractions in
+
+Lang Chain will respond to.
+
+Okay.
+
+But we'll be doing with we'll be dealing with LM and retriever.
+
+We'll be invoking them.
+
+Let's go and do that in cursor right now.

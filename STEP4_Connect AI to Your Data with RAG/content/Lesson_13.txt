@@ -1,0 +1,441 @@
+Well, just before we bring up our Whizzy interface, let me just show you a less whizzy one.
+
+Uh, what's broken with day three's notebook that we looked at before?
+
+You remember that we had our very nice, elegant, simple five line question answering that did just
+
+fine, and we brought up a nice UI on it.
+
+And here it is.
+
+And we could say, who is Avery?
+
+And it's gonna do just fine.
+
+It's gonna, of course, do a rag lookup.
+
+It's going to give us a great answer.
+
+Well, check this out.
+
+If I say how much is her salary?
+
+Uh, we are going to get something, uh, odd back.
+
+Samantha Green's current salary is 70,000.
+
+What is that about?
+
+Two things have gone on that are a problem here.
+
+The two things that I showed you, we fixed, uh, in the in the proper module implementation, the
+
+two problems with this, uh, with this simplistic version.
+
+First of all, it wasn't even looking at the history that didn't get passed to the LM.
+
+So when I say her there, it has no idea that I'm still referring to Avery, but even if it had known,
+
+it would still have had a problem, because that this is the text that's being used for the Rag lookup.
+
+And because of that, it's just picking some random document with salary in it.
+
+The first one that happens to be Samantha Green.
+
+And that's why we're getting a, uh, like a, like a red herring of an answer, something that seems
+
+to be a completely different topic.
+
+So those are the two problems.
+
+We're not maintaining conversation history when we call the LM, but also we're looking up context based
+
+off this.
+
+So the two fixes that I just showed you in that longer version, first of them is to build up the proper
+
+history and pass that into lang chain using that Lang chain conversion function.
+
+And secondly, I'm not just looking up the context on this.
+
+I'm looking at the context on the combination of all of this text so that it would in fact include Avery
+
+in there.
+
+That's why I did it.
+
+Now you see it broken.
+
+Let's see how it looks in the new Gradio UI.
+
+And so I bring up a new terminal with shift control Backtick.
+
+Where is it?
+
+There it is.
+
+Okay.
+
+And now I go into week five and now I do UV run app Dot Pi, and it's going to spring up a new window,
+
+I hope.
+
+After a small pause while Gradio chugs into gear and there it is.
+
+Bam!
+
+Here we go!
+
+The ensure expert assistant.
+
+A nice little UI, and we've got a conversation on the left and we've got retrieved.
+
+Context will appear here on the right.
+
+Isn't that cool?
+
+All right, so obviously I could say who is aviary and we'll see how it does okay.
+
+What have we got.
+
+So we get a good answer.
+
+Of course we know this answer.
+
+And on the right here relevant context, we have the information coming back here along with its source,
+
+the place that it came from.
+
+And this white text is what was actually provided in the context to the LM.
+
+The orange is is just a note of the metadata showing us the source of where it came from.
+
+But this was not provided to to the LM, just these white blobs.
+
+Here it all is.
+
+This is all the information that was passed about Avery.
+
+How many chunks do we have?
+
+We have one, two.
+
+Three.
+
+Four.
+
+Five.
+
+Five.
+
+Five chunks were retrieved because we set K to five.
+
+Beautiful.
+
+And now I can come back here and I can say.
+
+And what is her salary?
+
+And we hope that we will see a combination of things.
+
+Avery Lancaster's current salary is 2.25.
+
+We see that the relevant context it's retrieved is related to this text and this text.
+
+So it's still all about Avery.
+
+The current salary is right up there in the second chunk.
+
+And so it also the the chat was sent with history to uh for one nano.
+
+And it was able to say we're talking about Avery for sure.
+
+And I've got the context.
+
+I know her salary.
+
+That's how it responds.
+
+This is rag with history with lookup.
+
+Fantastic.
+
+It's working.
+
+Now let me go back into cursor.
+
+I just want to go into the knowledge base, into the employees, and I want to find one employee document
+
+in particular.
+
+I want to find Maxine Thompson.
+
+Here she is.
+
+Here is Maxine Thompson.
+
+Let's bring that up in a nice markdown style.
+
+Let's have a look.
+
+This is her HR record.
+
+We'll get the terminal out of the way there.
+
+Uh, if we look around here, you'll see that she was recognized as the inaugural innovator of the year
+
+in 2023, receiving a prestigious IIoT award, the inaugural innovator of the year award in 2023.
+
+Good for Maxine.
+
+Now, I wonder whether or not the the R rag pipeline is going to be able to retrieve that.
+
+That is a challenging one.
+
+Let's find out.
+
+Let's go back to the terminal.
+
+Let's start our Gradio app up.
+
+Here we go.
+
+And then we're going to ask the question.
+
+We are going to say okay then tell us who won the prestigious I o t y award.
+
+Give it that.
+
+Let's see what it can do.
+
+It says Maxine was recognized.
+
+It gets that right.
+
+And you can see over on the right what's going on that it's coming up and we'll see right there that,
+
+uh, it found the details in here somewhere.
+
+Uh, there we go.
+
+It's because she received the prestigious award.
+
+Was also mentioned in her promotion, and it's got it right there with her name.
+
+But you may notice something that's not perfect about this.
+
+You may notice that it says Maxine, but it doesn't say Maxine Thompson.
+
+It doesn't realize her full name.
+
+And that's that's this slightly tiresome thing that this chunk that it that it found here mentions that
+
+she received that award in this rather nice small chunk, but it doesn't have her full name in that
+
+chunk, because her full name was at the top of the HR document and not in the middle.
+
+And this is an example of a nasty little problem with Rag with chunking that the chunk might answer
+
+the question, but it might not contain some crucial context from elsewhere in the document, meaning
+
+that you get back an okay but not perfect answer.
+
+So that's an interesting one for us to observe.
+
+It's okay, but it's not as complete as it could be.
+
+And there are other problems too.
+
+There are some problems with the way that I did that history lookup, and that's slightly hacky way.
+
+Suppose I start a new conversation and I say, uh, who is Avery?
+
+Uh, like like this.
+
+Uh, who is Avery?
+
+And we get back on the right and answer and then say, uh, and what did Avery do before?
+
+We'll get back some more conversation about Avery before founding Ensure Elm, she worked as a senior
+
+product manager or coming from similar chunks, working well.
+
+And now we'll say who won the prestigious.
+
+Award and see how it does.
+
+And strangely, it hasn't got the answer.
+
+It doesn't know.
+
+Why has that happened?
+
+Well, that's because I made that change.
+
+So that when I'm retrieving context, I combine this and this and this.
+
+And now the thing that I'm looking up in my data store, it's got too much other stuff other than I.o.t.
+
+It's got too much about aviary.
+
+And so if we look over on the right, it's still finding chunks about aviary.
+
+That's not very satisfactory.
+
+So we have a problem.
+
+The the change that I made has made it better at looking up context that relates to the whole conversation,
+
+but in doing so it's made it poorer.
+
+If you then change the topic and want to talk about something completely different, it's still dredging
+
+up context from earlier in the conversation and that's no good.
+
+So how would you fix that?
+
+There are many ways to fix it, but there are some ways are better than others, and we will work on
+
+problems like this over the course of the next couple of days.
+
+But the real takeaway I have for you is that rag is something that can be quite hit and miss.
+
+And we're going to really double down on this tomorrow.
+
+But but it's it's important to recognize that Rag is this very experimental, really quite hacky approach
+
+of trying to look up relevant context.
+
+And it can frequently go wrong.
+
+You can get good examples of rag working really, really well.
+
+Like it's surfacing that Maxine won the award.
+
+But you can also see that it didn't quite get her full name.
+
+It wasn't complete.
+
+And then after we've talked about Avery for a bit, it's not able to find out who won the Coty Award.
+
+So so it's quite easy to get it off track.
+
+So the, the, the right way to approach Rag is to come up with each problem like this as a new problem
+
+to be solved.
+
+And it's a bit like whack a mole, you find something and then you fix it, and then you find another
+
+problem and you fix that.
+
+And sometimes in fixing one problem, you cause another problem, as we just have as I, as I fix that
+
+that history, I then I then created this new problem.
+
+So a lot about Rag is getting after these kinds of puzzles and making your rag system better and better
+
+through a series of different techniques.
+
+That's what Rag is all about.
+
+And there's a technique to allow us to do that in a more scientific way.
+
+And that's what we'll be covering tomorrow.
+
+And in the meantime, before I leave the screen, the mission for you before we go to tomorrow is to
+
+bring up this user interface.
+
+You've run App.py.
+
+After doing a CD implementation, you've run, ingest py to populate your data store.
+
+Then do a you've run app.py and experiment and find the rough edges.
+
+Find what it's good at, find what it's bad at.
+
+Look at the chunks on the right.
+
+Understand why are chunks getting surfaced?
+
+Try and get really great examples of rag doing an amazing job at showing deep expertise about information
+
+buried in the documents, but then also find cases where it foolishly is unable to answer something
+
+that's clearly there in the documents, and get a really good sense for what's working well.
+
+And what are the blind spots?
+
+What are the rough edges and have that on our list because we're going to get after them, fix them
+
+as we make our rag better and better, starting tomorrow and before tomorrow.
+
+I do hope that you're going to take a moment, uh, to, you know, if you're a wine drinker, then
+
+I'd say it deserves a nice glass of wine.
+
+Uh, maybe even a glass of champagne.
+
+You have built a rag product.
+
+You can do this.
+
+You can now write your own ingest dot pi.
+
+You can write your own app.py and your dot pi and have something which is able to vectorize, chunk,
+
+vectorize, store a bunch of documents, and then you can ask questions on them.
+
+And it apparently has expertise across your entire knowledge base and only you.
+
+You secretly know that it doesn't at any one time have knowledge of the whole knowledge base.
+
+It's doing this trick of using vector similarity to do a semantic search over your data, pluck out
+
+a few chunks of relevant context, shove them in the prompt, getting back an answer based on that knowledge
+
+each time.
+
+It's it's a trick.
+
+It's a conjuring trick.
+
+It works really well, and it gives the impression that you've got something that's an expert on your
+
+entire knowledge base, but it has some rough edges.
+
+So as a recap, you can now generate code, generate text with front end models.
+
+With open source models, you can use tools.
+
+You can confidently choose the right model for your projects and and add it to the list.
+
+You can implement a Rag expert question answering system and the secret, the dark secret.
+
+Just.
+
+Just between you and me is that it's actually quite easy from next time.
+
+Next time though, we're going to get more disciplined.
+
+You can explain the importance of evaluations evals.
+
+So critical going to be able to measure the effectiveness of your Rag system.
+
+And we'll be able to experiment with things like encoders and chunking strategies and use our metrics
+
+use our evaluations to to be able to to to gauge how much difference we're making and to be able to
+
+make decisions about different solutions we want to build.
+
+All right.
+
+Lots of stuff.
+
+Tomorrow it's going to be really, really great.
+
+Um, very much looking forward to it.
+
+I hope you are too.
+
+I will see you then.
