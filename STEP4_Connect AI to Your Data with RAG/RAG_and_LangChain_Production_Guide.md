@@ -41,6 +41,7 @@ You’ll understand *why* each step exists and *when* to choose one option over 
 | **Part 7** | [Production Operations](#part-7-production-operations--safety) |
 | **Part 8** | [Engineering Decision Matrix](#part-8-engineering-decision-matrix) |
 | **Lessons 9–13** | [Implementation Track](#implementation-track-lessons-913-query-pipeline-to-production) (query, temperature, stitching, modularization, failure modes) |
+| **Reference** | [ingest.py & answer.py](#reference-implementation-ingestpy--answerpy) — full code structure and breakdown |
 | **Part 9–11** | [Testing](#part-9-testing--quality), [Structure](#part-10-project-structure--boundaries), [Anti-Patterns](#part-11-anti-patterns-what-not-to-do) |
 | [Summary](#summary-for-eran) | What you’ve learned and next steps. |
 
@@ -481,7 +482,7 @@ So we avoid cutting in the middle of a sentence when we can.
 
 **Overlap** is important: typically **10–20%** of chunk size (e.g. 50 tokens overlap for 500-token chunks). Overlap keeps context across boundaries and reduces “chopped concept” issues.
 
-**Engineering choice:** Fixed token count alone is brittle. Recursive splitting + overlap is the default; then tune chunk size and overlap on your content and retrieval metrics.
+**Engineering choice:** Fixed token count alone is brittle. Recursive splitting + overlap is the default; then tune chunk size and overlap on your content and retrieval metrics. **Alternative:** Some implementations use an **LLM** to produce chunks (e.g. headline + summary + original text per chunk) for better semantic boundaries—see the [Reference Implementation: ingest.py](#reference-implementation-ingestpy--answerpy) for that pattern.
 
 ---
 
@@ -985,6 +986,365 @@ The **UI** (e.g. `app.py` or a FastAPI app) depends only on these two functions,
 
 ---
 
+# Reference Implementation: ingest.py & answer.py
+
+This section walks through a **production-style RAG implementation** split into two files: **ingest.py** (write path) and **answer.py** (read path). The code uses **raw OpenAI and Chroma** (no LangChain), so you see exactly what happens under the hood. The same architecture applies when you use LangChain: same separation of ingest vs query, same embedding consistency, same “context + question → LLM” stitch.
+
+Use this to see how the concepts from Parts 1–8 and Lessons 9–13 map onto real scripts and to understand the **architecture** behind a two-file RAG build.
+
+---
+
+## Architecture Overview: How the Two Files Fit Together
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  INGESTION (ingest.py) — runs on schedule or when new docs arrive                │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  knowledge-base/                                                                  │
+│    ├── *.md files                                                                 │
+│         │                                                                         │
+│         ▼                                                                         │
+│  fetch_documents()  ──►  create_chunks()  ──►  create_embeddings()               │
+│  (load by folder)        (LLM or splitter)    (OpenAI embed → Chroma add)         │
+│                                                      │                            │
+│                                                      ▼                            │
+│                                              preprocessed_db/  (Chroma)           │
+│                                              collection: "docs"                   │
+│                                              embedding_model: text-embedding-3-*  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                                         │
+                                         │  shared: DB_NAME, collection_name,
+                                         │          embedding_model (must match)
+                                         ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  QUERY (answer.py) — runs on every user question                                 │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│  question + optional history                                                       │
+│         │                                                                         │
+│         ▼                                                                         │
+│  fetch_context(question)  ──►  make_rag_messages(question, history, chunks)       │
+│  (embed question, query Chroma, optionally rewrite query, rerank)                │
+│         │                              │                                          │
+│         │                              ▼                                          │
+│         │                     completion(MODEL, messages)  ──►  answer             │
+│         │                                                                         │
+│         └──────────────────────────────► return (answer, chunks)  ──►  UI shows  │
+│                                            (sources for citation)      answer +   │
+│                                                                        sources   │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Design principles reflected here:**
+
+- **Single vector store, single embedding model:** Both scripts use the same `DB_NAME`, `collection_name`, and `embedding_model`. That’s the Golden Rule (Lesson 10).
+- **Ingest = write, Answer = read:** Ingestion creates/replaces the collection; the answer path only queries. In production they can run in different processes or services (e.g. cron vs API).
+- **Answer returns chunks:** The API returns `(answer, chunks)` so the UI can show **source documents** (Lesson 9, Part 7).
+
+---
+
+## ingest.py: Breakdown and Mapping to the Guide
+
+### Role of ingest.py
+
+Turn documents on disk into **chunks**, then **embed** them and **write** them into the vector store. Nothing in this file answers user questions—it only prepares the knowledge base.
+
+### 1. Config and shared constants (top of file)
+
+```python
+DB_NAME = str(Path(__file__).parent.parent / "preprocessed_db")
+collection_name = "docs"
+embedding_model = "text-embedding-3-large"
+KNOWLEDGE_BASE_PATH = Path(__file__).parent.parent / "knowledge-base"
+AVERAGE_CHUNK_SIZE = 100
+WORKERS = 3
+```
+
+- **DB_NAME / collection_name:** Must match what **answer.py** uses so both talk to the same Chroma collection. (See Part 10: same store for ingest and query.)
+- **embedding_model:** Must be **identical** in answer.py. If you change it here, you must re-run ingestion and use the same value at query time (Part 5, Lesson 10).
+- **KNOWLEDGE_BASE_PATH:** Where raw documents live (e.g. `.md` per folder). In a larger system this could be S3, a CMS, etc.
+- **AVERAGE_CHUNK_SIZE / WORKERS:** Tuning for chunking and parallel document processing (Part 4, Part 7).
+
+**Guide link:** Part 7 (Configuration & Secrets) — config at top; in production these would come from env or a config module.
+
+---
+
+### 2. Document and chunk schema (Pydantic)
+
+```python
+class Result(BaseModel):
+    page_content: str
+    metadata: dict
+
+class Chunk(BaseModel):
+    headline: str = Field(description="A brief heading for this chunk ...")
+    summary: str = Field(description="A few sentences summarizing the content ...")
+    original_text: str = Field(description="The original text of this chunk ...")
+
+    def as_result(self, document):
+        metadata = {"source": document["source"], "type": document["type"]}
+        return Result(
+            page_content=self.headline + "\n\n" + self.summary + "\n\n" + self.original_text,
+            metadata=metadata,
+        )
+```
+
+- **Result:** Same idea as LangChain’s `Document`: `page_content` (text stored and retrieved) + `metadata` (source, type). Answer.py will receive chunks in this shape (Part 4.4 Document & Retriever contracts).
+- **Chunk:** This implementation uses an **LLM** to produce structured chunks (headline, summary, original text) instead of a fixed-size splitter. That’s a valid production choice: semantic boundaries and summaries can improve retrieval. The important part is that each chunk becomes a **Result** with stable metadata for filtering and citation.
+
+**Guide link:** Part 4 (metadata for attribution and filtering); Part 4.4 (Document contract).
+
+---
+
+### 3. Loading documents: fetch_documents()
+
+```python
+def fetch_documents():
+    documents = []
+    for folder in KNOWLEDGE_BASE_PATH.iterdir():
+        doc_type = folder.name
+        for file in folder.rglob("*.md"):
+            with open(file, "r", encoding="utf-8") as f:
+                documents.append({"type": doc_type, "source": file.as_posix(), "text": f.read()})
+    return documents
+```
+
+- **Purpose:** Build a list of raw documents, each with `type` (e.g. folder name), `source` (path), and `text` (content). This is the “homemade DirectoryLoader” pattern.
+- **Metadata early:** Attaching `type` and `source` here ensures every chunk later can carry them (Part 4.3).
+
+**Guide link:** Part 4 (data preparation); Part 10 (ingestion pipeline).
+
+---
+
+### 4. Chunking via LLM: make_prompt(), process_document(), create_chunks()
+
+The implementation **does not** use `RecursiveCharacterTextSplitter`. It uses an **LLM** with a structured prompt to split each document into overlapping chunks with headline and summary:
+
+```python
+def make_prompt(document):
+    how_many = (len(document["text"]) // AVERAGE_CHUNK_SIZE) + 1
+    return f"""
+You take a document and you split the document into overlapping chunks ...
+This document should probably be split into at least {how_many} chunks ...
+There should be overlap between the chunks as appropriate; typically about 25% overlap ...
+For each chunk, provide a headline, a summary, and the original text.
+...
+{document["text"]}
+"""
+```
+
+- **Why LLM chunking:** Better semantic boundaries and built-in summaries (good for retrieval and display). Trade-off: cost and latency; you need a small/fast model and possibly rate-limit handling (WORKERS=1 if needed).
+- **Overlap:** The prompt asks for ~25% overlap, matching the guide’s 10–20% overlap idea (Part 4.2).
+
+```python
+@retry(wait=wait)
+def process_document(document):
+    messages = make_messages(document)
+    response = completion(model=MODEL, messages=messages, response_format=Chunks)
+    reply = response.choices[0].message.content
+    doc_as_chunks = Chunks.model_validate_json(reply).chunks
+    return [chunk.as_result(document) for chunk in doc_as_chunks]
+
+def create_chunks(documents):
+    chunks = []
+    with Pool(processes=WORKERS) as pool:
+        for result in tqdm(pool.imap_unordered(process_document, documents), total=len(documents)):
+            chunks.extend(result)
+    return chunks
+```
+
+- **process_document:** One document → one LLM call → list of `Result` with `page_content` and metadata. `@retry` handles transient failures (Part 7.4).
+- **create_chunks:** Parallel over documents. Output is a single flat list of chunks ready for embedding.
+
+**Guide link:** Part 4 (why we chunk, overlap); Part 7.4 (retries); Lesson 12 (ingestion as a separate process).
+
+---
+
+### 5. Embedding and writing to Chroma: create_embeddings()
+
+```python
+def create_embeddings(chunks):
+    chroma = PersistentClient(path=DB_NAME)
+    if collection_name in [c.name for c in chroma.list_collections()]:
+        chroma.delete_collection(collection_name)
+
+    texts = [chunk.page_content for chunk in chunks]
+    emb = openai.embeddings.create(model=embedding_model, input=texts).data
+    vectors = [e.embedding for e in emb]
+
+    collection = chroma.get_or_create_collection(collection_name)
+    ids = [str(i) for i in range(len(chunks))]
+    metas = [chunk.metadata for chunk in chunks]
+    collection.add(ids=ids, embeddings=vectors, documents=texts, metadatas=metas)
+```
+
+- **Delete then recreate:** Acceptable for **dev** or a full re-index. In **production** you’d use incremental upsert (Part 7.1).
+- **Batch embed:** `input=texts` sends all chunk texts in one API call (efficiency; Part 7.4 performance).
+- **Same embedding model:** `embedding_model` is the one answer.py must use for queries (Lesson 10).
+- **What gets stored:** For each chunk: `id`, **embedding** (vector), **documents** (text), **metadatas** (source, type). Chroma stores both the vector and the text so retrieval can return text + metadata without re-calling the embedding API.
+
+**Guide link:** Part 5 (encoder, vector store); Part 7.1 (dev wipe vs prod incremental); Lesson 10 (embedding consistency).
+
+---
+
+### 6. Main flow
+
+```python
+if __name__ == "__main__":
+    documents = fetch_documents()
+    chunks = create_chunks(documents)
+    create_embeddings(chunks)
+```
+
+**Order:** Load → Chunk → Embed → Write. This is the full ingestion pipeline; run it whenever the knowledge base changes (or on a schedule).
+
+---
+
+## answer.py: Breakdown and Mapping to the Guide
+
+### Role of answer.py
+
+Given a **question** (and optional **history**), **retrieve** relevant chunks from Chroma, then **build a prompt** (context + question) and call the **LLM** to produce an answer. Return **answer + chunks** so the UI can show sources.
+
+### 1. Config and Chroma client (top of file)
+
+```python
+DB_NAME = str(Path(__file__).parent.parent / "preprocessed_db")
+collection_name = "docs"
+embedding_model = "text-embedding-3-large"
+RETRIEVAL_K = 20
+FINAL_K = 10
+chroma = PersistentClient(path=DB_NAME)
+collection = chroma.get_or_create_collection(collection_name)
+```
+
+- **DB_NAME, collection_name, embedding_model:** Must match ingest.py (Lesson 10). This is how the “read” side uses the same index the “write” side built.
+- **RETRIEVAL_K / FINAL_K:** Retrieve 20 candidates, then rerank and keep 10. This is an **advanced** pattern (retrieve more, then rerank) to improve relevance; the guide’s basic pattern is “retrieve top-k with score_threshold” (Part 3.3, Lesson 9).
+
+**Guide link:** Part 5 (vector store); Lesson 10 (embedding consistency).
+
+---
+
+### 2. System prompt (context injection)
+
+```python
+SYSTEM_PROMPT = """
+You are a knowledgeable, friendly assistant representing the company Insurellm.
+...
+For context, here are specific extracts from the Knowledge Base that might be directly relevant to the user's question:
+{context}
+
+With this context, please answer the user's question. Be accurate, relevant and complete.
+If you don't know the answer, say so.
+"""
+```
+
+- **{context}:** Placeholder for the retrieved chunks. At runtime this is replaced by the concatenation of chunk texts (Lesson 11). The LLM **only** sees text—never vectors.
+- **“If you don’t know, say so”:** Reduces hallucination (Lesson 11, Part 7.2). Treat `context` as untrusted (sanitize/delimit in high-security settings).
+
+**Guide link:** Lesson 11 (prompt templates, stitching retrieval + generation).
+
+---
+
+### 3. Fetching context: embed query → query Chroma → (optional) rewrite + rerank
+
+**Step A — Unranked retrieval (same as “Retriever” in spirit):**
+
+```python
+def fetch_context_unranked(question):
+    query = openai.embeddings.create(model=embedding_model, input=[question]).data[0].embedding
+    results = collection.query(query_embeddings=[query], n_results=RETRIEVAL_K)
+    chunks = []
+    for result in zip(results["documents"][0], results["metadatas"][0]):
+        chunks.append(Result(page_content=result[0], metadata=result[1]))
+    return chunks
+```
+
+- **Same embedding model:** `embedding_model` is the same as in ingest.py. Query vector is in the same space as stored vectors (Lesson 10).
+- **Flow:** Question → one embedding API call → vector → Chroma `query` → list of (document, metadata). That’s exactly what a LangChain Retriever wraps (Lesson 9).
+- **Return type:** List of `Result` (page_content + metadata) for building the prompt and for UI citations.
+
+**Step B — Query rewriting (optional, improves retrieval):**
+
+```python
+def rewrite_query(question, history=[]):
+    """Rewrite the user's question to be a more specific question that is more likely to surface relevant content."""
+    # ... LLM call that returns a short, refined question ...
+    return response.choices[0].message.content
+```
+
+- **Purpose:** Turn “What did she do before?” (with history) into a stand-alone, specific question so vector search gets better results (Lesson 12, Lesson 13: query rewriting vs combine_question).
+
+**Step C — Merge and rerank:**
+
+```python
+def fetch_context(original_question):
+    rewritten_question = rewrite_query(original_question)
+    chunks1 = fetch_context_unranked(original_question)
+    chunks2 = fetch_context_unranked(rewritten_question)
+    chunks = merge_chunks(chunks1, chunks2)
+    reranked = rerank(original_question, chunks)
+    return reranked[:FINAL_K]
+```
+
+- **Dual retrieval:** Run retrieval on both the original and the rewritten question, then merge (dedupe). Then **rerank** with an LLM so the top FINAL_K chunks are the most relevant. This is an advanced pattern; the guide’s baseline is single retrieval + optional similarity_score_threshold (Lesson 9, Lesson 13).
+
+**Guide link:** Lesson 9 (Retriever = embed + query); Lesson 10 (same embedding model); Lesson 12–13 (query rewriting, reranking).
+
+---
+
+### 4. Building RAG messages and calling the LLM
+
+```python
+def make_rag_messages(question, history, chunks):
+    context = "\n\n".join(
+        f"Extract from {chunk.metadata['source']}:\n{chunk.page_content}" for chunk in chunks
+    )
+    system_prompt = SYSTEM_PROMPT.format(context=context)
+    return (
+        [{"role": "system", "content": system_prompt}]
+        + history
+        + [{"role": "user", "content": question}]
+    )
+
+def answer_question(question: str, history: list[dict] = []) -> tuple[str, list]:
+    chunks = fetch_context(question)
+    messages = make_rag_messages(question, history, chunks)
+    response = completion(model=MODEL, messages=messages)
+    return response.choices[0].message.content, chunks
+```
+
+- **make_rag_messages:** Inject **context** (retrieved chunks, with source labels) into the system prompt; append **history** and the current **question**. This is the “stitch” in Lesson 11: retrieval output (text) + user input → LLM input.
+- **answer_question:** Fetch context → build messages → one LLM call → return **(answer, chunks)**. The UI can show the answer and the list of chunks as sources (Lesson 9, Part 7.2).
+
+**Guide link:** Lesson 11 (prompt assembly, two API calls per query); Lesson 9 (show sources).
+
+---
+
+## How This Maps to the Guide’s Concepts
+
+| Concept in the guide | Where you see it in ingest.py / answer.py |
+|----------------------|-------------------------------------------|
+| **Two-model system (Part 2)** | Encoder (embedding_model) for retrieval; LLM (MODEL) for generation. Never send vectors to the LLM. |
+| **Chunking & metadata (Part 4)** | Chunk schema (headline, summary, original_text); metadata (source, type); overlap in prompt. |
+| **Encoder + vector store (Part 5)** | Same embedding_model; Chroma PersistentClient; batch embed and add. |
+| **Embedding consistency (Lesson 10)** | Same `embedding_model` in both files; re-index if you change it. |
+| **Retriever = embed + query (Lesson 9)** | fetch_context_unranked: embed question → collection.query → Result list. |
+| **Prompt = context + question (Lesson 11)** | SYSTEM_PROMPT with {context}; make_rag_messages(question, history, chunks). |
+| **Return answer + sources (Lesson 9, Part 7)** | answer_question returns (content, chunks) for UI citation. |
+| **Config at top (Part 7)** | DB_NAME, collection_name, embedding_model, RETRIEVAL_K, etc. |
+| **Retries (Part 7.4)** | @retry on process_document, rerank, rewrite_query, answer_question. |
+| **Ingest vs query separation (Lesson 12)** | Two files; ingest writes, answer reads; same store and embedding model. |
+
+---
+
+## Takeaway for the Junior
+
+- **ingest.py** = load docs → chunk (LLM or splitter) → embed with a **fixed** embedding model → write to Chroma. Run when the knowledge base changes.
+- **answer.py** = embed the **question** with the **same** embedding model → query Chroma → (optionally) rewrite query, merge, rerank → build prompt (context + question + history) → LLM → return answer + chunks for citation.
+- The **architecture** is the same whether you use LangChain or raw APIs: one store, one embedding model, clear split between “write” (ingest) and “read” (answer), and always pass **text** (not vectors) into the LLM and return **sources** to the UI.
+
+---
+
 ## Part 9: Testing & Quality
 
 ### 9.1 What to Test
@@ -1066,6 +1426,7 @@ You now have:
 - **Data:** Why we chunk, how to chunk (recursive + overlap), metadata, and **contracts** (Document, retriever, idempotent document_id).
 - **Infrastructure:** Encoder = quality/cost; store = scale/ops; re-index when you change the encoder; **ingestion model must equal query model**.
 - **Implementation track (Lessons 9–13):** Query pipeline (Retriever + LLM, invoke, UI with sources), **temperature** (low for RAG, reproducibility caveats), **stitching** (prompt template, two API calls per query), **modularization** (ingest vs answer, history handling, combine_question trade-offs), **failure modes** (topic drift, chunk boundaries, parent-document retrieval, systematic evaluation).
+- **Reference implementation (ingest.py & answer.py):** Full breakdown of a two-file RAG (raw OpenAI + Chroma): architecture diagram, ingest (load → chunk → embed → Chroma), answer (fetch_context → prompt → LLM → answer + chunks), and how each step maps to the guide’s concepts.
 - **Debugging:** t-SNE and logging to form hypotheses and validate with retrieval tests; **source citations** for trust and debugging.
 - **Operations:** Incremental indexing, logging, fallbacks, **error handling** (timeouts, retries, partial failure), **configuration & secrets**, and benchmarking.
 - **Testing:** Unit tests (chunking), integration tests (retriever shape, RAG pipeline), and an eval harness (RAGAS/TruLens) in CI.
